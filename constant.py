@@ -1,6 +1,7 @@
 # NOTE: The following numbers refer to GPIO numbers, not device pin numbers
 # =========================================================================
 # Bump switch definitions (1 starting from the left-most switch)
+# These button pins need to have a pull-up resistor enabled
 BUTTON1 = 2
 BUTTON2 = 3
 BUTTON3 = 4
