@@ -1,6 +1,8 @@
 from time import sleep
 from picamera import PiCamera
-import cv2
+
+
+# import cv2
 
 camera = PiCamera()
 camera.resolution = (1024, 768)
