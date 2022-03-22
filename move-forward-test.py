@@ -87,7 +87,7 @@ try:
     #BUTTON1 starts the motors
     if (not GPIO.input(C["BUTTON1"])):
       left.start(50)
-      right.start(50)
+      right.start(50) 
 
      # BUTTON2 stops the motors and ends execution
     elif (not GPIO.input(C["BUTTON2"])):
