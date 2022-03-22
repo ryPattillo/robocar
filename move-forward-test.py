@@ -59,7 +59,7 @@ try:
     r5 = GPIO.input(C["LINE_SENSOR_5"])
     r6 = GPIO.input(C["LINE_SENSOR_7"])
     r7 = GPIO.input(C["LINE_SENSOR_8"])
-    GPIO.output(C["LINE_SENSOR_LED"], 0)
+    #GPIO.output(C["LINE_SENSOR_LED"], 0)
     print(r2,r3,r4,r5,r6,r7)
     sleep(0.5)
 
