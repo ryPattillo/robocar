@@ -61,15 +61,15 @@ try:
     #sleep(2.0)
     #print(r2,r3,r4,r5,r6,r7)
 
-    # BUTTON1 starts the motors
-    if (not GPIO.input(C["BUTTON1"])):
-      left.start(50)
-      right.start(50)
+    # # BUTTON1 starts the motors
+    # if (not GPIO.input(C["BUTTON1"])):
+    #   left.start(50)
+    #   right.start(50)
 
-     # BUTTON3 stops the motors 
-    elif (not GPIO.input(C["BUTTON2"])):
-      left.stop()
-      right.stop()
+    #  # BUTTON3 stops the motors 
+    # elif (not GPIO.input(C["BUTTON2"])):
+    #   left.stop()
+    #   right.stop()
 
      # BUTTON3 stops the motors 
     if (GPIO.input(C["BUTTON4"])):
