@@ -50,16 +50,16 @@ try:
 
   while True:
 
-    #GPIO.output(C["LINE_SENSOR_LED"], 1)
-    #r2 = GPIO.input(C["LINE_SENSOR_1"])
-    #r3 = GPIO.input(C["LINE_SENSOR_2"])
-    #r4 = GPIO.input(C["LINE_SENSOR_4"])
-    #r5 = GPIO.input(C["LINE_SENSOR_5"])
-    #r6 = GPIO.input(C["LINE_SENSOR_7"])
-    #r7 = GPIO.input(C["LINE_SENSOR_8"])
-   # GPIO.output(C["LINE_SENSOR_LED"], 0)
-    #sleep(2.0)
-    #print(r2,r3,r4,r5,r6,r7)
+    GPIO.output(C["LINE_SENSOR_LED"], 1)
+    r2 = GPIO.input(C["LINE_SENSOR_1"])
+    r3 = GPIO.input(C["LINE_SENSOR_2"])
+    r4 = GPIO.input(C["LINE_SENSOR_4"])
+    r5 = GPIO.input(C["LINE_SENSOR_5"])
+    r6 = GPIO.input(C["LINE_SENSOR_7"])
+    r7 = GPIO.input(C["LINE_SENSOR_8"])
+    GPIO.output(C["LINE_SENSOR_LED"], 0)
+    sleep(2.0)
+    print(r2,r3,r4,r5,r6,r7)
 
     # # BUTTON1 starts the motors
     # if (not GPIO.input(C["BUTTON1"])):
@@ -72,7 +72,7 @@ try:
     #   right.stop()
 
      # BUTTON3 stops the motors 
-    if ( not GPIO.input(C["BUTTON2"])):
+    if (not GPIO.input(C["BUTTON2"])):
       print("Tset")
       GPIO.cleanup()
       exit()
