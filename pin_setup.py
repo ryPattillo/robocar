@@ -1,7 +1,7 @@
 import RPi.GPIO as GPIO
 from constant import CONSTANTS as C
 
-def configure():
+def setup():
     # Set mode
     GPIO.setmode(GPIO.BCM)
 
@@ -29,10 +29,10 @@ def configure():
     GPIO.setup(C["LINE_SENSOR_LED"], GPIO.OUT)
 
     # Allow for input from each of the sensors
-    GPIO.setup(C["LINE_SENSOR_1"], GPIO.IN)
-    GPIO.setup(C["LINE_SENSOR_2"], GPIO.IN)
-    GPIO.setup(C["LINE_SENSOR_4"], GPIO.IN)
-    GPIO.setup(C["LINE_SENSOR_5"], GPIO.IN)
-    GPIO.setup(C["LINE_SENSOR_7"], GPIO.IN)
-    GPIO.setup(C["LINE_SENSOR_8"], GPIO.IN)
+    GPIO.setup(C["LINE_SENSOR_1"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+    GPIO.setup(C["LINE_SENSOR_2"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+    GPIO.setup(C["LINE_SENSOR_4"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+    GPIO.setup(C["LINE_SENSOR_5"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+    GPIO.setup(C["LINE_SENSOR_7"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+    GPIO.setup(C["LINE_SENSOR_8"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
 
