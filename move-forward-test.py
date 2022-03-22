@@ -72,7 +72,7 @@ try:
     #   right.stop()
 
      # BUTTON3 stops the motors 
-    if ( GPIO.input(C["BUTTON2"])):
+    if ( not GPIO.input(C["BUTTON2"])):
       print("Tset")
       GPIO.cleanup()
       exit()
