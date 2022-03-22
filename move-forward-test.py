@@ -59,6 +59,7 @@ try:
     r7 = GPIO.input(C["LINE_SENSOR_8"])
     GPIO.output(C["LINE_SENSOR_LED"], 0)
     print(r2,r3,r4,r5,r6,r7)
+    sleep(0.5)
 
     # # BUTTON1 starts the motors
     # if (not GPIO.input(C["BUTTON1"])):
