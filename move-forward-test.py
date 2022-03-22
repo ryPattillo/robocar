@@ -2,43 +2,49 @@
 import RPi.GPIO as GPIO
 import traceback
 from time import sleep
+from constant import CONSTANTS as C
 
+# Set mode
 GPIO.setmode(GPIO.BCM)
 
-GPIO.setup(2, GPIO.IN)
-GPIO.setup(3, GPIO.IN)
+GPIO.setup(C["BUTTON1"], GPIO.IN)
+GPIO.setup(C["BUTTON2"], GPIO.IN)
 
-GPIO.setup(10, GPIO.OUT)
-GPIO.setup(9, GPIO.OUT)
-GPIO.setup(11, GPIO.OUT)
+GPIO.setup(C["LEFT_MOTOR_SLP"], GPIO.OUT)
+GPIO.setup(C["LEFT_MOTOR_DIR"], GPIO.OUT)
+GPIO.setup(C["LEFT_MOTOR_PWM"], GPIO.OUT)
 
-GPIO.setup(5, GPIO.OUT)
-GPIO.setup(6, GPIO.OUT)
-GPIO.setup(13, GPIO.OUT)
+GPIO.setup(C["RIGHT_MOTOR_SLP"], GPIO.OUT)
+GPIO.setup(C["RIGHT_MOTOR_DIR"], GPIO.OUT)
+GPIO.setup(C["RIGHT_MOTOR_PWM"], GPIO.OUT)
 
-GPIO.output(10, 1)
-GPIO.output(9, 0)
-left = GPIO.PWM(11, 1000)
 
-GPIO.output(5, 1)
-GPIO.output(6, 0)
-right = GPIO.PWM(13, 1000)
+# control left motor
+GPIO.output(C["LEFT_MOTOR_SLP"], 1)
+GPIO.output(C["LEFT_MOTOR_DIR"], 0)
+left = GPIO.PWM(C["LEFT_MOTOR_PWM"], 1000)
+
+# control right motor
+GPIO.output(C["RIGHT_MOTOR_SLP"], 1)
+GPIO.output(C["RIGHT_MOTOR_DIR"], 0)
+right = GPIO.PWM(C["RIGHT_MOTOR_PWM"], 1000)
 
 
 try:
+  # initially start at stop state
   left.stop()
   right.stop()
 
   while True:
-    if (not GPIO.input(2)):
+    # BUTTON1 starts the motors
+    if (not GPIO.input(C["BUTTON1"])):
       left.start(50)
       right.start(50)
-    elif (not GPIO.input(3)):
+
+     # BUTTON3 stops the motors 
+    elif (not GPIO.input(C["BUTTON2"])):
       left.stop()
       right.stop()
-
-except:
-  traceback.print_exc()
   
 finally:
   GPIO.cleanup()
