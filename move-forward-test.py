@@ -9,6 +9,8 @@ GPIO.setmode(GPIO.BCM)
 
 GPIO.setup(C["BUTTON1"], GPIO.IN)
 GPIO.setup(C["BUTTON2"], GPIO.IN)
+GPIO.setup(C["BUTTON3"], GPIO.IN)
+
 
 GPIO.setup(C["LEFT_MOTOR_SLP"], GPIO.OUT)
 GPIO.setup(C["LEFT_MOTOR_DIR"], GPIO.OUT)
