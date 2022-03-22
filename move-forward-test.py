@@ -20,6 +20,10 @@ GPIO.setup(C["RIGHT_MOTOR_PWM"], GPIO.OUT)
 
 
 GPIO.setup(C["LINE_SENSOR_LED"], GPIO.OUT)
+GPIO.output(C["LINE_SENSOR_LED"], 1)
+
+
+
 GPIO.setup(C["LINE_SENSOR_1"], GPIO.IN)
 
 
