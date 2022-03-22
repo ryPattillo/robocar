@@ -57,18 +57,17 @@ try:
 
   while True:
 
-    #GPIO.output(C["LINE_SENSOR_LED"], 1)
-    #sleep(0.01) #wait for the cap to charge. Equations available on wikipedia for working out exact times
-
+    GPIO.output(C["LINE_SENSOR_LED"], 1)
+    sleep(0.0001) #wait for the cap to charge. Equations available on wikipedia for working out exact times
     r2 = GPIO.input(C["LINE_SENSOR_1"])
     r3 = GPIO.input(C["LINE_SENSOR_2"])
     r4 = GPIO.input(C["LINE_SENSOR_4"])
     r5 = GPIO.input(C["LINE_SENSOR_5"])
     r6 = GPIO.input(C["LINE_SENSOR_7"])
     r7 = GPIO.input(C["LINE_SENSOR_8"])
-    #GPIO.output(C["LINE_SENSOR_LED"], 0)
+    GPIO.output(C["LINE_SENSOR_LED"], 0)
     print(r2,r3,r4,r5,r6,r7)
-    sleep(0.5)
+   
 
     # # BUTTON1 starts the motors
     # if (not GPIO.input(C["BUTTON1"])):
