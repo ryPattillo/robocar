@@ -20,8 +20,6 @@ GPIO.setup(C["RIGHT_MOTOR_PWM"], GPIO.OUT)
 
 
 GPIO.setup(C["LINE_SENSOR_LED"], GPIO.OUT)
-GPIO.output(C["LINE_SENSOR_LED"], 1)
-
 
 
 GPIO.setup(C["LINE_SENSOR_1"], GPIO.IN)
@@ -49,7 +47,12 @@ try:
 
   while True:
 
-    # print(GPIO.input(C["LINE_SENSOR_1"]))
+    GPIO.output(C["LINE_SENSOR_LED"], 1)
+    reading = GPIO.input(C["LINE_SENSOR_1"])
+    GPIO.output(C["LINE_SENSOR_LED"], 0)
+    sleep(2.0)
+    print(reading)
+
     # BUTTON1 starts the motors
     if (not GPIO.input(C["BUTTON1"])):
       left.start(50)
