@@ -9,7 +9,7 @@ GPIO.setmode(GPIO.BCM)
 
 GPIO.setup(C["BUTTON1"], GPIO.IN)
 GPIO.setup(C["BUTTON2"], GPIO.IN)
-GPIO.setup(C["BUTTON3"], GPIO.IN)
+GPIO.setup(C["BUTTON4"], GPIO.IN)
 
 
 GPIO.setup(C["LEFT_MOTOR_SLP"], GPIO.OUT)
@@ -72,7 +72,7 @@ try:
       right.stop()
 
      # BUTTON3 stops the motors 
-    if (GPIO.input(C["BUTTON3"])):
+    if (GPIO.input(C["BUTTON4"])):
       print("Tset")
       GPIO.cleanup()
       exit()
