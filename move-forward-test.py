@@ -23,6 +23,10 @@ GPIO.setup(C["LINE_SENSOR_LED"], GPIO.OUT)
 GPIO.setup(C["LINE_SENSOR_1"], GPIO.IN)
 
 
+GPIO.output(C["LEFT_MOTOR_SLP"], 0)
+
+
+
 # control left motor
 GPIO.output(C["LEFT_MOTOR_SLP"], 1)
 GPIO.output(C["LEFT_MOTOR_DIR"], 0)
@@ -41,7 +45,7 @@ try:
 
   while True:
 
-    print(GPIO.input(C["LINE_SENSOR_1"]))
+    # print(GPIO.input(C["LINE_SENSOR_1"]))
     # BUTTON1 starts the motors
     if (not GPIO.input(C["BUTTON1"])):
       left.start(50)
