@@ -68,6 +68,12 @@ try:
     elif (not GPIO.input(C["BUTTON2"])):
       left.stop()
       right.stop()
+
+     # BUTTON3 stops the motors 
+    if (GPIO.input(C["BUTTON3"])):
+      GPIO.cleanup()
+      exit()
+
   
 finally:
   GPIO.cleanup()
