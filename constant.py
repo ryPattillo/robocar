@@ -29,7 +29,7 @@ CONSTANTS = {
 
     "RIGHT_MOTOR_SLP":5,
     "RIGHT_MOTOR_DIR":6,
-    "RIGHT_MOTOR_PWM":13 ,
+    "RIGHT_MOTOR_PWM":13,
 
     # Encoder definitions
     "LEFT_ENCODER_B": 23,

@@ -8,6 +8,7 @@ def setup():
     # Configure Bumb Sensors
     GPIO.setup(C["BUTTON1"], GPIO.IN)
     GPIO.setup(C["BUTTON2"], GPIO.IN)
+    
     # NOTE: Pull up resistors: put the power between +V and signal
     # NOTE: Pull down resistors: Put in between +v and ground (-v)  
     GPIO.setup(C["BUTTON3"], GPIO.IN, pull_up_down = GPIO.PUD_UP)

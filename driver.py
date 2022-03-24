@@ -2,8 +2,54 @@
 import RPi.GPIO as GPIO
 from time import sleep
 from constant import CONSTANTS as C
-from pin_configure import setup
+from pin_setup import setup
 from picamera import PiCamera
+
+
+# Set mode
+GPIO.setmode(GPIO.BCM)
+
+# Configure Bumb Sensors
+GPIO.setup(C["BUTTON1"], GPIO.IN)
+GPIO.setup(C["BUTTON2"], GPIO.IN)
+
+# NOTE: Pull up resistors: put the power between +V and signal
+# NOTE: Pull down resistors: Put in between +v and ground (-v)  
+GPIO.setup(C["BUTTON3"], GPIO.IN, pull_up_down = GPIO.PUD_UP)
+GPIO.setup(C["BUTTON4"], GPIO.IN, pull_up_down = GPIO.PUD_UP)
+GPIO.setup(C["BUTTON5"], GPIO.IN, pull_up_down = GPIO.PUD_UP)
+GPIO.setup(C["BUTTON6"], GPIO.IN, pull_up_down = GPIO.PUD_UP)
+
+# Configure left motor
+GPIO.setup(C["LEFT_MOTOR_SLP"], GPIO.OUT)
+GPIO.setup(C["LEFT_MOTOR_DIR"], GPIO.OUT)
+GPIO.setup(C["LEFT_MOTOR_PWM"], GPIO.OUT)
+
+# Configure right motor
+GPIO.setup(C["RIGHT_MOTOR_SLP"], GPIO.OUT)
+GPIO.setup(C["RIGHT_MOTOR_DIR"], GPIO.OUT)
+GPIO.setup(C["RIGHT_MOTOR_PWM"], GPIO.OUT)
+
+# The led needed for the light sensors to work
+GPIO.setup(C["LINE_SENSOR_LED"], GPIO.OUT)
+
+# Allow for input from each of the sensors
+GPIO.setup(C["LINE_SENSOR_1"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+GPIO.setup(C["LINE_SENSOR_2"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+GPIO.setup(C["LINE_SENSOR_4"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+GPIO.setup(C["LINE_SENSOR_5"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+GPIO.setup(C["LINE_SENSOR_7"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+GPIO.setup(C["LINE_SENSOR_8"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+
+    # Set up left motor contorls
+GPIO.output(C["LEFT_MOTOR_SLP"], 1)
+GPIO.output(C["LEFT_MOTOR_DIR"], 0)
+# Set up right motor controls
+GPIO.output(C["RIGHT_MOTOR_SLP"], 1)
+GPIO.output(C["RIGHT_MOTOR_DIR"], 0)
+
+left =  GPIO.PWM(C["LEFT_MOTOR_PWM"], 1000)
+right = GPIO.PWM(C["RIGHT_MOTOR_PWM"], 1000)
 
 def not_defined(channel):
     '''
@@ -18,8 +64,10 @@ def start_motors(channel):
 
     # NOTE: The motors are not being start up for some reason
     print("MOTORS STARTING")
-    left =  GPIO.PWM(C["LEFT_MOTOR_PWM"], 1000)
-    right = GPIO.PWM(C["RIGHT_MOTOR_PWM"], 1000)
+
+
+
+    #sleep(0.5)
     left.start(50)
     right.start(50)
 
@@ -28,8 +76,8 @@ def stop_motors(channel):
     Call back to stop the motors
     '''
     print("MOTORS STOPPING")
-    GPIO.PWM(C["LEFT_MOTOR_PWM"], 1000).stop()
-    GPIO.PWM(C["RIGHT_MOTOR_PWM"], 1000).stop()
+    left.stop()
+    right.stop()
 
 def end(channel):
     ''' 
@@ -47,19 +95,12 @@ def line_found(channel):
 if __name__ == "__main__":
 
   # set up all the pin
-  setup()
+
 
   # Set up camera module
   camera = PiCamera()
   camera.resolution = (1024, 768)
   camera.start_preview()
-
-  # Set up left motor contorls
-  GPIO.output(C["LEFT_MOTOR_SLP"], 1)
-  GPIO.output(C["LEFT_MOTOR_DIR"], 0)
-  # Set up right motor controls
-  GPIO.output(C["RIGHT_MOTOR_SLP"], 1)
-  GPIO.output(C["RIGHT_MOTOR_DIR"], 0)
 
   # Ensure motors begin at stop state
   GPIO.PWM(C["LEFT_MOTOR_PWM"], 1000).stop()
