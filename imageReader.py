@@ -28,7 +28,7 @@ def find_squares(contours):
         # get the dimensions to check for square
         dim = cv2.approxPolyDP(cnt, 0.01*cnt_len, True)
 
-        if len(dim) == 3:
+        if len(dim) == 4 and cv2.contourArea(cnt) > 2000:
             print("Square")
             squares.append(cnt)
 
@@ -49,12 +49,8 @@ def detect_signs():
 
     # get the squares in the image
     squares = find_squares(contours)
+
     if len(squares) != 0:
         return True
     else:
         return False
-    #cv2.drawContours(original_img, squares, -1, (0, 255, 0), 3)
-
-    #cv2.imshow('Contours', original_img)
-    #cv2.waitKey(0)
-    #cv2.destroyAllWindows()
