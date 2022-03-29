@@ -11,20 +11,15 @@ from pynput import keyboard
 
 def on_press(key):
   try:
-	#if(key == keyboard.Key.right):
-		#print("clicked right arrow key")
-    
-	print('Alphanumeric key pressed: {0} '.format(key.char))
+    print('Alphanumeric key pressed: {0} '.format(key.char))
   except AttributeError:
     print('special key pressed: {0}'.format(key))
 
 def on_release(key):
   print('Key released: {0}'.format(key))
   if key == keyboard.Key.esc:
-	# Exit Program
-	exit()
     # Stop listener
-    #return False
+    return False
 
 def not_defined(channel):
     '''
@@ -73,11 +68,9 @@ if __name__ == "__main__":
 
 
   # Set up camera module
-  #camera = PiCamera()
-  #camera.resolution = (1024, 768)
-  #camera.start_preview()
-  
-  print('Press any Key')
+  camera = PiCamera()
+  camera.resolution = (1024, 768)
+  camera.start_preview()
 
   # Collect events until released
   with keyboard.Listener(
