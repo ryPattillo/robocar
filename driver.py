@@ -6,13 +6,13 @@ from pin_setup import setup
 from picamera import PiCamera
 from imageReader import detect_signs
 
-# Set mode
-GPIO.setwarnings(False)
+# Configure all the pins
 setup()
 
-# Set up left motor contorls
+# Set up left motor controls
 GPIO.output(C["LEFT_MOTOR_SLP"], 1)
 GPIO.output(C["LEFT_MOTOR_DIR"], 0)
+
 # Set up right motor controls
 GPIO.output(C["RIGHT_MOTOR_SLP"], 1)
 GPIO.output(C["RIGHT_MOTOR_DIR"], 0)
@@ -20,11 +20,7 @@ GPIO.output(C["RIGHT_MOTOR_DIR"], 0)
 left =  GPIO.PWM(C["LEFT_MOTOR_PWM"], 1000)
 right = GPIO.PWM(C["RIGHT_MOTOR_PWM"], 1000)
 
-def not_defined(channel):
-    '''
-    Callback that does nothing
-    '''
-    print("BUTTON HAS NO FUNCTIOALITY")
+#### ALL THE MOTOR CONTROL FUNCTIONS ###
 
 def start_motors(channel):
     '''
@@ -45,6 +41,42 @@ def stop_motors(channel):
     left.stop()
     right.stop()
 
+def turn_left():
+    '''
+    Function turn robot to the left
+    '''
+    pass
+
+def turn_right():
+    '''
+    Function to turn robot to the right
+    '''
+    pass
+
+def speed_up():
+    '''
+    Function to speed up robot
+    '''
+    pass
+
+def slow_down():  
+    '''
+    Function to slow down robot
+    '''
+    pass
+
+#############################################
+
+
+############ UTILITY CALLBACKS ###############
+
+def not_defined(channel):
+    '''
+    Callback that does nothing
+    '''
+    print("BUTTON HAS NO FUNCTIOALITY")
+
+
 def end(channel):
     ''' 
     To Cleanly terminate the program
@@ -52,31 +84,25 @@ def end(channel):
     GPIO.cleanup()
     exit()
 
-def line_falling(channel):
-    '''
-    Called when a line is detected from the sensor
-    '''
-    print("LINE FALLING")    
-
+#################################################
 
 if __name__ == "__main__":
 
     # Set up camera module
     camera = PiCamera()
+
+    # TODO: Figure out what resolution works well
     camera.resolution = (1024, 768)
     camera.start_preview()
 
-    # Ensure motors begin at stop state
+    # We want the motors to be initially stoped
     left.stop()
     right.stop()
 
+    # USER GUIDE
     print("BUTTON 1 STARTS MOTORS")
     print("BUTTON 2 STOPS MOTORS")
     print("BUTTON 3 ENDS EXECUTION")
-
-    # NOTE: we need to get line sensors working with the event detectors 
-    #GPIO.add_event_detect(C["LINE_SENSOR_1"],GPIO.RISING, callback = line_found,bouncetime = 500)
-    #GPIO.add_event_detect(C["LINE_SENSOR_4"],GPIO.RISING, callback = line_found,bouncetime = 500)
 
     # Events for when the buttons are clicked
     GPIO.add_event_detect(C["BUTTON1"],GPIO.FALLING, callback = start_motors,bouncetime = 500)
@@ -86,22 +112,21 @@ if __name__ == "__main__":
     GPIO.add_event_detect(C["BUTTON5"],GPIO.FALLING, callback = not_defined,bouncetime = 200)
     GPIO.add_event_detect(C["BUTTON6"],GPIO.FALLING, callback = not_defined,bouncetime = 200)
 
-    # Allow for input from each of the sensors
-    GPIO.setup(C["LINE_SENSOR_1"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
-    GPIO.setup(C["LINE_SENSOR_2"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
-    GPIO.setup(C["LINE_SENSOR_4"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
-    GPIO.setup(C["LINE_SENSOR_5"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
-    GPIO.setup(C["LINE_SENSOR_7"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
-    GPIO.setup(C["LINE_SENSOR_8"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+    # TODO: Allow for input from each of the sensors
+    # GPIO.setup(C["LINE_SENSOR_1"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+    # GPIO.setup(C["LINE_SENSOR_2"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+    # GPIO.setup(C["LINE_SENSOR_4"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+    # GPIO.setup(C["LINE_SENSOR_5"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+    # GPIO.setup(C["LINE_SENSOR_7"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+    # GPIO.setup(C["LINE_SENSOR_8"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
 
-    # TODO: we need to get line sensors working with the event detectors 
-    #GPIO.add_event_detect(C["LINE_SENSOR_1"],GPIO.FALLING, callback = line_falling,bouncetime =1)
-    #GPIO.add_event_detect(C["LINE_SENSOR_4"],GPIO.FALLING, callback = line_falling,bouncetime =1)
 
     while True:
         # Capture an image every 2 seconds
         sleep(2)
         img = camera.capture('image.jpg')
+
+        # see if any signs are detected in image
         if detect_signs():
             print("Signs Detected")
         else:

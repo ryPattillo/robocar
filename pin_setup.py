@@ -2,6 +2,9 @@ import RPi.GPIO as GPIO
 from constant import CONSTANTS as C
 
 def setup():
+
+    GPIO.setwarnings(False)
+
     # Set mode
     GPIO.setmode(GPIO.BCM)
 
