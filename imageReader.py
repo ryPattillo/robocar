@@ -44,7 +44,7 @@ def detect_signs():
     img = pre_process(original_img)
     
     # find the contours in the image
-    contours, hierarchy = cv2.findContours(img, 
+    _,contours,_ = cv2.findContours(img, 
         cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     # get the squares in the image
