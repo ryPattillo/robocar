@@ -4,6 +4,7 @@ from time import sleep
 from constant import CONSTANTS as C
 from pin_setup import setup
 from picamera import PiCamera
+from imageReader import detect_signs
 
 # Set mode
 setup()
@@ -97,8 +98,10 @@ if __name__ == "__main__":
     #GPIO.add_event_detect(C["LINE_SENSOR_4"],GPIO.FALLING, callback = line_falling,bouncetime =1)
 
     while True:
-
-        pass
         # Capture an image every 2 seconds
         sleep(2)
-        camera.capture('image.jpg')
+        img = camera.capture('image.jpg')
+        if detect_signs():
+            print("Signs Detected")
+        else:
+            print("Signs not detected")
