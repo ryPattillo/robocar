@@ -35,7 +35,7 @@ def find_squares(contours):
     print(len(squares))
     return squares
 
-def detect_signs(img):
+def detect_signs():
 
     # read in image
     original_img = cv2.imread("shapes.png")

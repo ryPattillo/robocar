@@ -7,6 +7,7 @@ from picamera import PiCamera
 from imageReader import detect_signs
 
 # Set mode
+GPIO.setwarnings(False)
 setup()
 
 # Set up left motor contorls
@@ -66,8 +67,8 @@ if __name__ == "__main__":
     camera.start_preview()
 
     # Ensure motors begin at stop state
-    GPIO.PWM(C["LEFT_MOTOR_PWM"], 1000).stop()
-    GPIO.PWM(C["RIGHT_MOTOR_PWM"], 1000).stop()
+    left.stop()
+    right.stop()
 
     print("BUTTON 1 STARTS MOTORS")
     print("BUTTON 2 STOPS MOTORS")
