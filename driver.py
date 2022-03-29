@@ -4,10 +4,50 @@ from time import sleep
 from constant import CONSTANTS as C
 from pin_setup import setup
 from picamera import PiCamera
- 
-GPIO.cleanup()
 
-setup()
+
+# Set mode
+GPIO.setmode(GPIO.BCM)
+
+# Configure Bumb Sensors
+GPIO.setup(C["BUTTON1"], GPIO.IN)
+GPIO.setup(C["BUTTON2"], GPIO.IN)
+
+# NOTE: Pull up resistors: put the power between +V and signal
+# NOTE: Pull down resistors: Put in between +v and ground (-v)  
+GPIO.setup(C["BUTTON3"], GPIO.IN, pull_up_down = GPIO.PUD_UP)
+GPIO.setup(C["BUTTON4"], GPIO.IN, pull_up_down = GPIO.PUD_UP)
+GPIO.setup(C["BUTTON5"], GPIO.IN, pull_up_down = GPIO.PUD_UP)
+GPIO.setup(C["BUTTON6"], GPIO.IN, pull_up_down = GPIO.PUD_UP)
+
+# Configure left motor
+GPIO.setup(C["LEFT_MOTOR_SLP"], GPIO.OUT)
+GPIO.setup(C["LEFT_MOTOR_DIR"], GPIO.OUT)
+GPIO.setup(C["LEFT_MOTOR_PWM"], GPIO.OUT)
+
+# Configure right motor
+GPIO.setup(C["RIGHT_MOTOR_SLP"], GPIO.OUT)
+GPIO.setup(C["RIGHT_MOTOR_DIR"], GPIO.OUT)
+GPIO.setup(C["RIGHT_MOTOR_PWM"], GPIO.OUT)
+
+# The led needed for the light sensors to work
+GPIO.setup(C["LINE_SENSOR_LED"], GPIO.OUT)
+
+# Allow for input from each of the sensors
+GPIO.setup(C["LINE_SENSOR_1"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+GPIO.setup(C["LINE_SENSOR_2"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+GPIO.setup(C["LINE_SENSOR_4"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+GPIO.setup(C["LINE_SENSOR_5"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+GPIO.setup(C["LINE_SENSOR_7"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+GPIO.setup(C["LINE_SENSOR_8"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+
+    # Set up left motor contorls
+GPIO.output(C["LEFT_MOTOR_SLP"], 1)
+GPIO.output(C["LEFT_MOTOR_DIR"], 0)
+# Set up right motor controls
+GPIO.output(C["RIGHT_MOTOR_SLP"], 1)
+GPIO.output(C["RIGHT_MOTOR_DIR"], 0)
+
 left =  GPIO.PWM(C["LEFT_MOTOR_PWM"], 1000)
 right = GPIO.PWM(C["RIGHT_MOTOR_PWM"], 1000)
 
@@ -46,22 +86,13 @@ def end(channel):
     GPIO.cleanup()
     exit()
 
-def line_rising(channel):
+def line_found(channel):
     '''
     Called when a line is detected from the sensor
     '''
-    print("LINE RISING")    
-
-def line_falling(channel):
-
-    '''
-    Called when a line is detected from the sensor
-    '''
-    print("LINE FALLING")    
+    print("LINE FOUND")    
 
 if __name__ == "__main__":
-
-
 
   # set up all the pin
 
@@ -75,20 +106,14 @@ if __name__ == "__main__":
   GPIO.PWM(C["LEFT_MOTOR_PWM"], 1000).stop()
   GPIO.PWM(C["RIGHT_MOTOR_PWM"], 1000).stop()
 
-
-  # Make I/O line an input
-
   print("BUTTON 1 STARTS MOTORS")
   print("BUTTON 2 STOPS MOTORS")
   print("BUTTON 3 ENDS EXECUTION")
 
   # NOTE: we need to get line sensors working with the event detectors 
-  #GPIO.add_event_detect(C["LINE_SENSOR_1"],GPIO.FALLING, callback = line_falling,bouncetime = 1)
-  #GPIO.add_event_detect(C["LINE_SENSOR_4"],GPIO.FALLING, callback = line_falling,bouncetime =1)
+  #GPIO.add_event_detect(C["LINE_SENSOR_1"],GPIO.RISING, callback = line_found,bouncetime = 500)
+  #GPIO.add_event_detect(C["LINE_SENSOR_4"],GPIO.RISING, callback = line_found,bouncetime = 500)
 
-
-  #GPIO.add_event_detect(C["LINE_SENSOR_1"],GPIO.RISING, callback = line_rising,bouncetime = 1)
-  #GPIO.add_event_detect(C["LINE_SENSOR_4"],GPIO.RISING, callback = line_rising,bouncetime = 1)
 
   # Events for when the buttons are clicked
   # NOTE: All of these are being called correctly however the motors are not being start up
@@ -102,20 +127,11 @@ if __name__ == "__main__":
 
   while True:
 
-    # Drive output high
-    #GPIO.output(C["LINE_SENSOR_LED"],1)
-    # Allow at least 10 micro seconds
-    #sleep(0.00001)
-    #GPIO.output(C["LINE_SENSOR_LED"],0)
-
-
-
-
+    pass
     # Capture an image every 2 seconds
-    #sleep(2)
+    # sleep(2)
     #camera.capture('foo.jpg')
   
-
     # find_sign('image.jp')
     # if sign == 'speed_up':
         # speed up
