@@ -8,7 +8,7 @@ def setup():
     # Configure Bumb Sensors
     GPIO.setup(C["BUTTON1"], GPIO.IN)
     GPIO.setup(C["BUTTON2"], GPIO.IN)
-    
+
     # NOTE: Pull up resistors: put the power between +V and signal
     # NOTE: Pull down resistors: Put in between +v and ground (-v)  
     GPIO.setup(C["BUTTON3"], GPIO.IN, pull_up_down = GPIO.PUD_UP)
@@ -30,10 +30,10 @@ def setup():
     GPIO.setup(C["LINE_SENSOR_LED"], GPIO.OUT)
 
     # Allow for input from each of the sensors
-    GPIO.setup(C["LINE_SENSOR_1"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
-    GPIO.setup(C["LINE_SENSOR_2"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
-    GPIO.setup(C["LINE_SENSOR_4"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
-    GPIO.setup(C["LINE_SENSOR_5"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
-    GPIO.setup(C["LINE_SENSOR_7"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
-    GPIO.setup(C["LINE_SENSOR_8"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+    GPIO.setup(C["LINE_SENSOR_1"], GPIO.IN,pull_up_down = GPIO.PUD_DOWN)
+    GPIO.setup(C["LINE_SENSOR_2"], GPIO.IN,pull_up_down = GPIO.PUD_DOWN)
+    GPIO.setup(C["LINE_SENSOR_4"], GPIO.IN,pull_up_down = GPIO.PUD_DOWN)
+    GPIO.setup(C["LINE_SENSOR_5"], GPIO.IN,pull_up_down = GPIO.PUD_DOWN)
+    GPIO.setup(C["LINE_SENSOR_7"], GPIO.IN,pull_up_down = GPIO.PUD_DOWN)
+    GPIO.setup(C["LINE_SENSOR_8"], GPIO.IN,pull_up_down = GPIO.PUD_DOWN)
 
