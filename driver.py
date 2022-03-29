@@ -4,7 +4,7 @@ from time import sleep
 from constant import CONSTANTS as C
 from pin_setup import setup
 from picamera import PiCamera
-
+ 
 GPIO.cleanup()
 
 setup()
