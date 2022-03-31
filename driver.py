@@ -120,14 +120,16 @@ if __name__ == "__main__":
     # GPIO.setup(C["LINE_SENSOR_7"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
     # GPIO.setup(C["LINE_SENSOR_8"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
 
-
     while True:
+        pass
+     
+        # TODO: work on CV after motor control worked out
         # Capture an image every 2 seconds
-        sleep(2)
-        img = camera.capture('image.jpg')
+        # sleep(2)
+        # img = camera.capture('image.jpg')
 
         # see if any signs are detected in image
-        if detect_signs():
-            print("Signs Detected")
-        else:
-            print("Signs not detected")
+        #if detect_signs():
+        #    print("Signs Detected")
+        # else:
+        #   print("Signs not detected")
