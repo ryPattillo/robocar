@@ -89,7 +89,7 @@ def end(channel):
 if __name__ == "__main__":
 
     # Set up camera module
-    camera = PiCamera()
+    # camera = PiCamera()
 
     # TODO: Figure out what resolution works well
     camera.resolution = (1024, 768)
