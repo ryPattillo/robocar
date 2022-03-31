@@ -92,8 +92,8 @@ if __name__ == "__main__":
     # camera = PiCamera()
 
     # TODO: Figure out what resolution works well
-    camera.resolution = (1024, 768)
-    camera.start_preview()
+    #camera.resolution = (1024, 768)
+    # camera.start_preview()
 
     # We want the motors to be initially stoped
     left.stop()
