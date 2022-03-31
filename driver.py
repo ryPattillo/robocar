@@ -3,7 +3,7 @@ import RPi.GPIO as GPIO
 from time import sleep
 from constant import CONSTANTS as C
 from pin_setup import setup
-from picamera import PiCamera
+#from picamera import PiCamera
 from imageReader import detect_signs
 
 # Configure all the pins
