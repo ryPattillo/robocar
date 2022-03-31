@@ -9,16 +9,16 @@ from imageReader import detect_signs
 # Configure all the pins
 setup()
 
-# Set up left motor controls
-GPIO.output(C["LEFT_MOTOR_SLP"], 1)
-GPIO.output(C["LEFT_MOTOR_DIR"], 0)
-
 # Set up right motor controls
 GPIO.output(C["RIGHT_MOTOR_SLP"], 1)
 GPIO.output(C["RIGHT_MOTOR_DIR"], 0)
 
-left =  GPIO.PWM(C["LEFT_MOTOR_PWM"], 1000)
+# Set up left motor controls
+GPIO.output(C["LEFT_MOTOR_SLP"], 1)
+GPIO.output(C["LEFT_MOTOR_DIR"], 0)
+
 right = GPIO.PWM(C["RIGHT_MOTOR_PWM"], 1000)
+left =  GPIO.PWM(C["LEFT_MOTOR_PWM"], 1000)
 
 #### ALL THE MOTOR CONTROL FUNCTIONS ###
 
@@ -30,8 +30,25 @@ def start_motors(channel):
     # NOTE: The motors are not being start up for some reason
     print("MOTORS STARTING")
 
+
+    GPIO.output(C["LEFT_MOTOR_DIR"], 0)
+    GPIO.output(C["RIGHT_MOTOR_DIR"], 0)
+
+    
+    # Primes the PWM
+    GPIO.output(C["RIGHT_MOTOR_SLP"], 0)
+    GPIO.output(C["LEFT_MOTOR_SLP"], 0)
     left.start(50)
     right.start(50)
+    sleep(2)
+    left.stop()
+    right.stop()
+    GPIO.output(C["RIGHT_MOTOR_SLP"], 1)
+    GPIO.output(C["LEFT_MOTOR_SLP"], 1)
+
+    left.start(50)
+    right.start(50)
+    
 
 def stop_motors(channel):
     '''
@@ -40,6 +57,13 @@ def stop_motors(channel):
     print("MOTORS STOPPING")
     left.stop()
     right.stop()
+
+def spin(channel):
+
+    GPIO.output(C["LEFT_MOTOR_DIR"], 1)
+    GPIO.output(C["RIGHT_MOTOR_DIR"], 0)
+    left.start(50)
+    right.start(50)
 
 def turn_left():
     '''
@@ -108,7 +132,7 @@ if __name__ == "__main__":
     GPIO.add_event_detect(C["BUTTON1"],GPIO.FALLING, callback = start_motors,bouncetime = 500)
     GPIO.add_event_detect(C["BUTTON2"],GPIO.FALLING, callback = stop_motors,bouncetime = 500)
     GPIO.add_event_detect(C["BUTTON3"],GPIO.FALLING, callback = end,bouncetime = 200)
-    GPIO.add_event_detect(C["BUTTON4"],GPIO.FALLING, callback = not_defined,bouncetime = 200)
+    GPIO.add_event_detect(C["BUTTON4"],GPIO.FALLING, callback = spin,bouncetime = 200)
     GPIO.add_event_detect(C["BUTTON5"],GPIO.FALLING, callback = not_defined,bouncetime = 200)
     GPIO.add_event_detect(C["BUTTON6"],GPIO.FALLING, callback = not_defined,bouncetime = 200)
 
