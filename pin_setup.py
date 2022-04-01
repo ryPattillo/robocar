@@ -40,3 +40,10 @@ def setup():
     GPIO.setup(C["LINE_SENSOR_7"], GPIO.IN,pull_up_down = GPIO.PUD_DOWN)
     GPIO.setup(C["LINE_SENSOR_8"], GPIO.IN,pull_up_down = GPIO.PUD_DOWN)
 
+    # Set up Encoders
+    GPIO.setup(C["LEFT_ENCODER_B"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+    GPIO.setup(C["LEFT_ENCODER_A"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
+    GPIO.setup(C["RIGHT_ENCODER_A"],GPIO.IN,pull_up_down = GPIO.PUD_UP)
+    GPIO.setup(C["RIGHT_ENCODER_B"],GPIO.IN,pull_up_down = GPIO.PUD_UP)
+
+ 
