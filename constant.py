@@ -4,7 +4,6 @@
 # These button pins need to have a pull-up resistor enabled
 
 CONSTANTS = {
-
     # Bump Sensor Definitions
     "BUTTON1":2,
     "BUTTON2":3,
@@ -12,15 +11,6 @@ CONSTANTS = {
     "BUTTON4":17,
     "BUTTON5":27,
     "BUTTON6":22,
-
-    # Line sensor definitions (1 starting from the left-most sensor)
-    "LINE_SENSOR_LED":24,
-    "LINE_SENSOR_1":25,
-    "LINE_SENSOR_2":8,
-    "LINE_SENSOR_4":7,
-    "LINE_SENSOR_5":12,
-    "LINE_SENSOR_7":16,
-    "LINE_SENSOR_8":20,
 
     # Motor pin definitions
     "LEFT_MOTOR_SLP":10,
@@ -32,12 +22,19 @@ CONSTANTS = {
     "RIGHT_MOTOR_PWM":13,
 
     # Encoder definitions
-    "LEFT_ENCODER_B": 23,
-    "LEFT_ENCODER_A": 18,
+    "LEFT_ENCODER_B":23,
+    "LEFT_ENCODER_A":24,
+    
+    "RIGHT_ENCODER_A":25,
+    "RIGHT_ENCODER_B":26,
 
-    "RIGHT_ENCODER_A":19,
-    "RIGHT_ENCODER_B":26
-
+    # NOTE: line sensors are not currently being used
+    # Line sensor definitions (1 starting from the left-most sensor)
+    # "LINE_SENSOR_2":8,
+    # "LINE_SENSOR_4":7,
+    # "LINE_SENSOR_5":12,
+    # "LINE_SENSOR_7":16,
+    # "LINE_SENSOR_8":20,
 }
 
 
