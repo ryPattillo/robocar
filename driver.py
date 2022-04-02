@@ -6,109 +6,25 @@ from picamera import PiCamera
 from constant import CONSTANTS as C
 from pin_setup import setup
 from imageReader import detect_signs
+from encoder import Encoder
+from motor_control import MotorControl
 
 # Configure all the pins
 setup()
 
-# set up left and right motor controls
-# NOTE:  motors should initally be off, [SLP = 1]
-GPIO.output(C["RIGHT_MOTOR_SLP"], 1)
-GPIO.output(C["LEFT_MOTOR_SLP"], 1)
-# set right and left motor equal to the PWM pins
-# NOTE: 2nd refers to the frequencyof the PWM
-right_motor = GPIO.PWM(C["RIGHT_MOTOR_PWM"], 1000)
-left_motor =  GPIO.PWM(C["LEFT_MOTOR_PWM"], 1000)
-# motors initially should be stopped
-left_motor.stop()
-right_motor.stop()
-
-
-def drive_forward(channel):
+def print_ticks(ticks):
     '''
-    call back for starting the motors forward
+    utility function to print the tick data from the encoder
     '''
-    # NOTE: The motors are not being start up for some reason
-    print("FORWARD DRIVE STARTING........")
-
-    # direction should be forward[0]
-    GPIO.output(C["LEFT_MOTOR_DIR"], 0)
-    GPIO.output(C["RIGHT_MOTOR_DIR"], 0)
-    
-    # sleep should be disabled 
-    GPIO.output(C["RIGHT_MOTOR_SLP"], 1)
-    GPIO.output(C["LEFT_MOTOR_SLP"], 1)
-
-    # motors started with a duty cycle of 50%
-    left_motor.start(50)
-    right_motor.start(50)
-    
-
-def stop_motors(channel):
-    '''
-    callback to stop the motors
-    '''
-    print("MOTORS STOPPING...........")
-    left_motor.stop()
-    right_motor.stop()
-
-def drive_spin(channel):
-    '''
-    callback for driving robot in spin mode
-    '''
-    # left motor will go in reverse and right will go forward
-    GPIO.output(C["LEFT_MOTOR_DIR"], 1)
-    GPIO.output(C["RIGHT_MOTOR_DIR"], 0)
-
-    # start motors with duty cycle 50%
-    left_motor.start(50)
-    right_motor.start(50)
-
-def read_encoder(channel):
-    '''
-    callback for reading encoder data
-    '''
-    global total_clicks_la
-    global total_clicks_lb 
-    global total_clicks_ra
-    global total_clicks_rb 
-
-    if channel == 23:
-        total_clicks_lb += 1
-    if channel == 24:
-        total_clicks_la += 1
-    if channel == 25:
-        total_clicks_ra += 1
-    if channel == 26:
-        total_clicks_rb += 1
-
-
-def not_defined(channel):
-    '''
-    callback that currently
-    '''
-    print("BUTTON IS NOT BEING USED")
-
-
-def end(channel):
-    ''' 
-    cleanly exit the program and clear defined pins
-    '''
-    GPIO.cleanup()
-    exit()
-
+    print("LEFT WHEEL A CLICKS: ",ticks[0])
+    print("LEFT WHEEL B CLICKS: ",ticks[1])
+    print()
+    print("RIGHT WHEEL A CLICKS: ",ticks[2])
+    print("RIGHT WHEEL B CLICKS: ",ticks[3])
+    print()
 
 if __name__ == "__main__":
 
-    global total_clicks_la
-    global total_clicks_lb 
-    global total_clicks_ra
-    global total_clicks_rb
-
-    total_clicks_la = 0
-    total_clicks_lb = 0
-    total_clicks_ra = 0
-    total_clicks_rb = 0
- 
     # NOTE: following code is for camera module that is not implemented yet
     # Set up camera module
     # camera = PiCamera()
@@ -122,19 +38,23 @@ if __name__ == "__main__":
     print("BUTTON 3 ENDS EXECUTION")
     print("BUTTON 4 DRIVES ROBOT IN SPIN MODE")
 
+    # get necessary objects
+    encoder = Encoder()
+    motor_control = MotorControl(20)
+
     # event handlers for when the bumb buttons are clicked
-    GPIO.add_event_detect(C["BUTTON1"],GPIO.FALLING, callback = drive_forward,bouncetime = 500)
-    GPIO.add_event_detect(C["BUTTON2"],GPIO.FALLING, callback = stop_motors,bouncetime = 500)
-    GPIO.add_event_detect(C["BUTTON3"],GPIO.FALLING, callback = end,bouncetime = 200)
-    GPIO.add_event_detect(C["BUTTON4"],GPIO.FALLING, callback = drive_spin,bouncetime = 200)
-    GPIO.add_event_detect(C["BUTTON5"],GPIO.FALLING, callback = not_defined,bouncetime = 200)
-    GPIO.add_event_detect(C["BUTTON6"],GPIO.FALLING, callback = not_defined,bouncetime = 200)
+    GPIO.add_event_detect(C["BUTTON1"],GPIO.FALLING, callback = motor_control.drive_forward,bouncetime = 500)
+    GPIO.add_event_detect(C["BUTTON2"],GPIO.FALLING, callback = motor_control.stop_motors,bouncetime = 500)
+    GPIO.add_event_detect(C["BUTTON3"],GPIO.FALLING, callback = motor_control.end,bouncetime = 200)
+    GPIO.add_event_detect(C["BUTTON4"],GPIO.FALLING, callback = motor_control.drive_spin,bouncetime = 200)
+    GPIO.add_event_detect(C["BUTTON5"],GPIO.FALLING, callback = motor_control.not_defined,bouncetime = 200)
+    GPIO.add_event_detect(C["BUTTON6"],GPIO.FALLING, callback = motor_control.not_defined,bouncetime = 200)
 
     # event handlers for recieving encoder data
-    GPIO.add_event_detect(C["RIGHT_ENCODER_A"],GPIO.BOTH, callback = read_encoder,bouncetime = 200)
-    GPIO.add_event_detect(C["RIGHT_ENCODER_B"],GPIO.BOTH, callback = read_encoder,bouncetime = 200)
-    GPIO.add_event_detect(C["LEFT_ENCODER_A"],GPIO.BOTH, callback = read_encoder,bouncetime = 200)
-    GPIO.add_event_detect(C["LEFT_ENCODER_B"],GPIO.BOTH, callback = read_encoder,bouncetime = 200)
+    GPIO.add_event_detect(C["RIGHT_ENCODER_A"],GPIO.BOTH, callback = encoder.read_encoder)
+    GPIO.add_event_detect(C["RIGHT_ENCODER_B"],GPIO.BOTH, callback = encoder.read_encoder)
+    GPIO.add_event_detect(C["LEFT_ENCODER_A"],GPIO.BOTH, callback = encoder.read_encoder)
+    GPIO.add_event_detect(C["LEFT_ENCODER_B"],GPIO.BOTH, callback = encoder.read_encoder)
 
     # NOTE: sensors are not currently being used
     # GPIO.setup(C["LINE_SENSOR_1"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
@@ -144,15 +64,40 @@ if __name__ == "__main__":
     # GPIO.setup(C["LINE_SENSOR_7"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
     # GPIO.setup(C["LINE_SENSOR_8"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
 
-    while True:
+    TARGET = 500
+    SLEEP_TIME = 1
+    KP = 0.002
 
-        sleep(2)
-        print("LEFT WHEEL A CLICKS: ",total_clicks_la)
-        print("LEFT WHEEL B CLICKS: ",total_clicks_lb)
-        print()
-        print("RIGHT WHEEL A CLICKS: ",total_clicks_ra)
-        print("RIGHT WHEEL B CLICKS: ",total_clicks_rb)
-        print()
+    speed_lm = 20
+    speed_rm = 20
+    # DUTY CYCLE 50% -> 5 ticks/second
+
+    while True:
+        sleep(SLEEP_TIME)
+
+        # get tick data form the encoder class
+        ticks = encoder.return_ticks()
+        # print_ticks(ticks)
+  
+        la_error = TARGET - ticks[0]
+        lb_error = TARGET - ticks[1]
+        ra_error = TARGET - ticks[2]
+        rb_error = TARGET - ticks[3]
+
+        speed_lm += (la_error + lb_error) * KP
+        speed_rm += (ra_error + rb_error) * KP
+
+        # Ensure we do not set speed faster than 99 or lower than 0
+        speed_lm = max(min(99, speed_lm), 0)
+        speed_rm = max(min(99, speed_rm), 0)
+
+        # ERROR IS POSITIVE MEAN MOVING TOO FAST
+        print("LEFT A ENCODER ERROR: ", la_error)
+        print("LEFT B ENCODER ERROR: ", lb_error)
+        print("RIGHT A ENCODER ERROR: ", ra_error)
+        print("RIGHT B ENCODER ERROR: ", rb_error)
+        print("ADJUSTING SPEED TO MINIMIZE ERROR")
+        motor_control.change_speed(speed_lm,speed_rm)
 
         # NOTE: CV not implemented yet
         # img = camera.capture('image.jpg')
@@ -163,4 +108,4 @@ if __name__ == "__main__":
         #   print("Signs not detected")
 
 
-
+        encoder.reset()

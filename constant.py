@@ -22,8 +22,8 @@ CONSTANTS = {
     "RIGHT_MOTOR_PWM":13,
 
     # Encoder definitions
-    "LEFT_ENCODER_B":23,
     "LEFT_ENCODER_A":24,
+    "LEFT_ENCODER_B":23,
     
     "RIGHT_ENCODER_A":25,
     "RIGHT_ENCODER_B":26,
