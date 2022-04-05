@@ -30,5 +30,3 @@ class Encoder:
       self.ticks_lb = 0
       self.ticks_rb = 0
       self.ticks_ra = 0
-    
-    

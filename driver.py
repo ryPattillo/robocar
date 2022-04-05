@@ -12,20 +12,21 @@ from motor_control import MotorControl
 # Configure all the pins
 setup()
 
-
 def pid(target,kp,ticks,lm_speed,rm_speed):
     '''
     calculate new speed based on encoder data, target, and kp
     '''
+    # compute error
     la_error = target - ticks[0]
     lb_error = target - ticks[1]
     ra_error = target - ticks[2]
     rb_error = target - ticks[3]
 
-    lm_speed += (la_error + lb_error) * KP
-    rm_speed += (ra_error + rb_error) * KP
+    # adjust spped accordingly
+    lm_speed += (la_error + lb_error) * kp
+    rm_speed += (ra_error + rb_error) * kp
 
-    # Ensure we do not set speed faster than 99 or lower than 0
+    # ensure we do not set speed faster than 99 or lower than 0
     lm_speed = max(min(99, lm_speed), 0)
     rm_speed = max(min(99, rm_speed), 0)
 
@@ -44,7 +45,7 @@ def print_ticks(ticks):
 
 def print_error(la_error,lb_error,ra_error,rb_error):
     '''
-    Utility function to print out encoder error
+    utility function to print out encoder error
     '''
     print("LEFT A ENCODER ERROR: ", la_error)
     print("LEFT B ENCODER ERROR: ", lb_error)
@@ -55,13 +56,13 @@ def print_error(la_error,lb_error,ra_error,rb_error):
 def calibrate_encoders(motor_control,encoder,seconds):
     '''
     utility function to calibrate encoder speed
-    this used to vsee how the change in duty cycle will affect the encoder readings
+    this used to see how the change in duty cycle will affect the encoder readings
     this information will help me get encoder duty cycle info from encoders
     '''
-
+    ticks = (0,0,0,0)
     if motor_control.started:
         # try each speed
-        for speed in range(99):
+        for speed in range(20,99):
             # reset encoders
             encoder.reset()
             # bump up speed
@@ -69,15 +70,17 @@ def calibrate_encoders(motor_control,encoder,seconds):
             # sleep for certain amount of time
             sleep(seconds)
             # hold on to previous tick numbers
-            prev_ticks = ticks
+            prev_left_ticks = ticks[0] + ticks[1]
+            prev_right_ticks = ticks[1] + ticks[2]
             # see how ticks are changing
             ticks = encoder.return_ticks()
+            left_ticks = ticks[0] + ticks[1]
+            right_ticks = ticks[2] + ticks[3]
 
-            print("DUTY CYCLE [%d]")
-            print("LEFT ENCODER A TICKS  [%d] | CHANGE FROM PREVIOUS [%d]" % (ticks[0],ticks[0] - prev_ticks[0]) )
-            print("LEFT ENCODER B TICKS  [%d] | CHANGE FROM PREVIOUS [%d]" % (ticks[1],ticks[1] - prev_ticks[1]))
-            print("RIGHT ENCODER A TICKS [%d] | CHANGE FROM PREVIOUS [%d]" % (ticks[2],ticks[2] - prev_ticks[2]))
-            print("RIGHT ENCODER B TICKS [%d] | CHANGE FROM PREVIOUS [%d]" % (ticks[3],ticks[3] - prev_ticks[3]))
+            print("LEFT ENCODER TICKS  [%d] | CHANGE FROM PREVIOUS [%d]" % (left_ticks, left_ticks - prev_left_ticks))
+            print("RIGHT ENCODER TICKS [%d] | CHANGE FROM PREVIOUS [%d]" % (right_ticks,right_ticks - prev_right_ticks))
+            print("RATIO OF LEFT TICKS TO SPEED %f" % (left_ticks / speed))
+            print("RATIO OF RIGHT TICKS TO SPEED %f"% (right_ticks / speed))
             print()
     else:
         print("Motor must be started first")
@@ -88,7 +91,7 @@ if __name__ == "__main__":
     # Set up camera module
     # camera = PiCamera()
     # TODO: Figure out what resolution works well
-    #camera.resolution = (1024, 768)
+    # camera.resolution = (1024, 768)
     # camera.start_preview()
 
     # user instructions
@@ -123,25 +126,34 @@ if __name__ == "__main__":
     # GPIO.setup(C["LINE_SENSOR_7"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
     # GPIO.setup(C["LINE_SENSOR_8"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
 
-    SLEEP_TIME = 2
+    SLEEP_TIME = 1
+    target_ticks = 2770
+    kp = 0.00002
+    lm_speed = 50
+    rm_speed = 50
 
-
-
-    target = 100
-    kp = 0.002
-    lm_speed = 0
-    rm_speed = 0
-
+    timer = 0
     while True:
         sleep(SLEEP_TIME)
         # get tick data form the encoder class
         ticks = encoder.return_ticks()
-        # print_ticks(ticks)
         
-        # calbirate the encoder
-        calibrate_encoders(motor_control,encoder,1)
-        #lm_speed,rm_spped = pid(target,kp,ticks,lm_speed,rm_speed)
-        #motor_control.change_speed(lm_speed,rm_speed)
+        # NOTE: following function call are just utility
+        # print_ticks(ticks)
+        # calibrate_encoders(motor_control,encoder,1)
+
+        # get the left and right speed adjustments
+        lm_speed,rm_speed = pid(target_ticks,kp,ticks,lm_speed,rm_speed)
+        motor_control.change_speed(lm_speed,rm_speed)
+        encoder.reset()
+        # timer used just for testing
+        timer += 1
+        if timer % 5 == 0:
+            # turn robot right after 10 seconds
+            motor_control.turn_right()
+        # elif timer % 5 == 0:
+        #     # turn robot left after 10 seconds
+        #     motor_control.turn_left()
 
         # NOTE: CV not implemented yet
         # img = camera.capture('image.jpg')
@@ -150,6 +162,3 @@ if __name__ == "__main__":
         #    print("Signs Detected")
         # else:
         #   print("Signs not detected")
-
-
-        encoder.reset()
