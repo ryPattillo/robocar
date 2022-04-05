@@ -23,28 +23,21 @@ class MotorControl:
         self.left_motor.stop()
         self.speed = speed
 
-    def drive_forward(self,channel):
+    def start(self,channel):
         '''
         call back for starting the motors forward
         '''
 
         # NOTE: The motors are not being start up for some reason
-        print("FORWARD DRIVE STARTING........")
-
-        # direction should be forward[0]
-        GPIO.output(C["LEFT_MOTOR_DIR"], 0)
-        GPIO.output(C["RIGHT_MOTOR_DIR"], 0)
-        
+        print("MOTORS STARTING UP........")
         # sleep should be disabled 
         GPIO.output(C["RIGHT_MOTOR_SLP"], 1)
         GPIO.output(C["LEFT_MOTOR_SLP"], 1)
-
         # motors started with a duty cycle of 50%
-        self.left_motor.start(self.speed)
-        self.right_motor.start(self.speed)
+        self.left_motor.start(0)
+        self.right_motor.start(0)
 
-        self.started = True
-        
+        self.started = True    
 
     def stop_motors(self,channel):
         '''
@@ -54,7 +47,6 @@ class MotorControl:
         self.left_motor.stop()
         self.right_motor.stop()
         self.started = False
-
 
     def drive_spin(self,channel):
         '''
@@ -70,7 +62,6 @@ class MotorControl:
 
         self.started = True
 
-
     def not_defined(self,channel):
         '''
         callback that currently
@@ -81,6 +72,10 @@ class MotorControl:
         ''' 
         cleanly exit the program and clear defined pins
         '''
+        
+        # stop the motors
+        self.left_motor.stop()
+        self.right_motor.stop()
         GPIO.cleanup()
         exit()
 
@@ -88,7 +83,6 @@ class MotorControl:
         '''
         change the speed of the motors
         '''
-
         if self.started:
             print("LEFT MOTOR SPEED BEING ADJUSTED TO ",speed_lm,"%")
             print("RIGHT MOTOR SPEED BEING ADJUSTED TO ",speed_rm,"%")

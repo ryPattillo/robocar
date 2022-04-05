@@ -15,7 +15,7 @@ CONSTANTS = {
     # Motor pin definitions
     "LEFT_MOTOR_SLP":10,
     "LEFT_MOTOR_DIR":9,
-    "LEFT_MOTOR_PWM":11,
+    "LEFT_MOTOR_PWM":12,
 
     "RIGHT_MOTOR_SLP":5,
     "RIGHT_MOTOR_DIR":6,
