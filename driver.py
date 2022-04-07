@@ -156,13 +156,15 @@ class Driver:
     def drive(self):
 
         self.add_interrupts()
-        if self.drive_mode:
+        print(self.drive_mode)
+        if self.drive_mode == 1:
             # keyboard listener
             keyboard.on_press(self.key_press)
         else:
+            print("test")
             # just cruise
             self.motor_control.start(self.cruising_speed,self.cruising_speed)
-            
+
         # sleep for a certain amount of time in while loop                  
         SLEEP_TIME = 1
         while True:

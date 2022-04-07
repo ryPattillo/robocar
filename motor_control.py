@@ -58,8 +58,9 @@ class MotorControl:
         '''
         change the current direction of the robot
         '''
-        GPIO.output(C["LEFT_MOTOR_DIR"], not self.dir)
-        GPIO.output(C["RIGHT_MOTOR_DIR"], not self.dir)
+        self.dir = not self.dir
+        GPIO.output(C["LEFT_MOTOR_DIR"], self.dir)
+        GPIO.output(C["RIGHT_MOTOR_DIR"], self.dir)
 
     def not_defined(self,channel):
         '''
