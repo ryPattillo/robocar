@@ -106,7 +106,9 @@ class Driver:
         '''
         # start the motor
         if key.name == "enter":
-            self.motor_control.start(0)
+            self.lm_speed = self.cruising_speed
+            self.rm_speed = self.cruising_speed
+            self.motor_control.start(0,0)
         # kill the program
         elif key.name == "delete":
             self.motor_control.end(0)
@@ -135,7 +137,7 @@ class Driver:
             self.rm_speed = self.cruising_speed    
         # reverse
         elif key.name == "r":
-            self.motor_control.change_direction()
+            self.motor_control.change_direction(0)
         # change to updated speed    
         self.motor_control.change_speed(self.lm_speed,self.rm_speed)
 

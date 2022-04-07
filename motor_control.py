@@ -32,8 +32,8 @@ class MotorControl:
         start will set the direction and turn off sleep but not change speed
         '''
         # NOTE: The motors are not being start up for some reason
-        print("LEFT MOTOR SPEED BEING ADJUSTED TO ",speed_lm,"%")
-        print("RIGHT MOTOR SPEED BEING ADJUSTED TO ",speed_rm,"%")
+        print("LEFT MOTOR SPEED BEING ADJUSTED TO ",start_lm,"%")
+        print("RIGHT MOTOR SPEED BEING ADJUSTED TO ",start_rm,"%")
         # sleep should be disabled 
         GPIO.output(C["LEFT_MOTOR_DIR"], self.dir)
         GPIO.output(C["RIGHT_MOTOR_DIR"], self.dir)
