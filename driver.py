@@ -141,7 +141,7 @@ class Driver:
 
     def add_interrupts(self):
         # robot should reverse when it hits something
-        GPIO.add_event_detect(C["BUTTON1"],GPIO.FALLING, callback = self.motor_control.change_direction,bouncetime = 500)
+        GPIO.add_event_detect(C["BUTTON1"],GPIO.FALLING, callback = self.motor_control.end,bouncetime = 500)
         GPIO.add_event_detect(C["BUTTON2"],GPIO.FALLING, callback = self.motor_control.change_direction,bouncetime = 500)
         GPIO.add_event_detect(C["BUTTON3"],GPIO.FALLING, callback = self.motor_control.change_direction,bouncetime = 200)
         GPIO.add_event_detect(C["BUTTON4"],GPIO.FALLING, callback = self.motor_control.change_direction,bouncetime = 200)
@@ -154,11 +154,16 @@ class Driver:
         GPIO.add_event_detect(C["LEFT_ENCODER_B"],GPIO.BOTH, callback =  self.encoder.read_encoder)
 
     def drive(self):
+
+        self.add_interrupts()
         if self.drive_mode:
             # keyboard listener
             keyboard.on_press(self.key_press)
         else:
-            self.motor_control.change_speed(self.cruising_speed,self.cruising_speed) 
+            # just cruise
+            self.motor_control.start(self.cruising_speed,self.cruising_speed)
+            
+        # sleep for a certain amount of time in while loop                  
         SLEEP_TIME = 1
         while True:
             sleep(SLEEP_TIME)
