@@ -11,7 +11,7 @@ class MotorControl:
     # keep track of if motors have been started
     started = False
 
-    def __init__(self,speed):
+    def __init__(self):
         # set up left and right motor controls
         # NOTE:  motors should initally be off, [SLP = 1]
         GPIO.output(C["RIGHT_MOTOR_SLP"], 1)
@@ -23,7 +23,7 @@ class MotorControl:
         # motors initially should be stopped
         self.right_motor.stop()
         self.left_motor.stop()
-        self.speed = speed
+        
 
     def start(self,channel):
         '''

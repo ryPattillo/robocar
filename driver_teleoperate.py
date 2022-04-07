@@ -7,30 +7,31 @@ import keyboard
 # left =  GPIO.PWM(C["LEFT_MOTOR_PWM"], 1000)
 # right = GPIO.PWM(C["RIGHT_MOTOR_PWM"], 1000)
 
-def key_press(key):
-  print("Key: ", key.name)
 
+def key_press(key):
+
+  print(key.name)
+  # if key.name == "left":
+  #   return(key.name)
+  #   pass
+
+  # elif key == "right":
+  #   # turn right
+  #   pass
+
+  # elif key == "up":
+  #   # speed up
+  #   pass 
+ 
+  # elif key == "down":
+  #   # slow down
+  #   pass
 
 if __name__ == "__main__":
-
-  # set up all the pin
-
-  # Collect events until released
-  # with keyboard.Listener(
-  #       on_press=on_press,
-  #       on_release=on_release) as listener:
-  #   listener.join()
-
+  
   keyboard.on_press(key_press)
+
   while True:
 
     pass
-    # Capture an image every 2 seconds
-    # sleep(2)
-    #camera.capture('foo.jpg')
   
-    # find_sign('image.jp')
-    # if sign == 'speed_up':
-        # speed up
-    # elif sign == 'slow_down: 
-      # slow down

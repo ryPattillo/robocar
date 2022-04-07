@@ -12,9 +12,8 @@ import keyboard
 
 class Driver: 
         
-
     def __init__(self):
-        self.motor_control = MotorControl(10,10)
+        self.motor_control = MotorControl()
         self.lm_speed = 0
         self.rm_speed = 0
 
@@ -123,6 +122,10 @@ class Driver:
         elif key.name == "down":
             self.lm_speed -= 1
             self.rm_speed -= 1
+
+        elif key.name == "z":
+            self.lm_speed = 20
+            self.rm_speed = 20    
 
         self.motor_control.change_speed(self.lm_speed,self.rm_speed)
 
