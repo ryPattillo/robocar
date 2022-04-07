@@ -1,7 +1,6 @@
 
 import RPi.GPIO as GPIO
 from time import sleep
-#from picamera import PiCamera
 
 from constant import CONSTANTS as C
 from pin_setup import setup
@@ -11,16 +10,24 @@ from motor_control import MotorControl
 import keyboard
 
 class Driver: 
-        
-    def __init__(self):
+    '''
+    Driver class
+    '''    
+    def __init__(self,drive_mode,cruising_speed):
         self.motor_control = MotorControl()
         self.lm_speed = 0
         self.rm_speed = 0
-
+        self.cruising_speed = cruising_speed
+        self.drive_mode = drive_mode
+        self.encoder = Encoder()
+ 
     def pid(self,target,kp,ticks):
         '''
         calculate new speed based on encoder data, target, and kp
         '''
+        target_ticks = 2770
+        kp = 0.00002
+
         lm_speed = self.motor_control.lm_speed
         rm_speed = self.motor_control.rm_speed
 
@@ -29,18 +36,18 @@ class Driver:
         ra_error = target - ticks[2]
         rb_error = target - ticks[3]
 
-        lm_speed += (la_error + lb_error) * kp
-        rm_speed += (ra_error + rb_error) * kp
+        self.lm_speed += (la_error + lb_error) * kp
+        self.rm_speed += (ra_error + rb_error) * kp
 
         # Ensure we do not set speed faster than 99 or lower than 0
-        lm_speed = max(min(99, lm_speed), 0)
-        rm_speed = max(min(99, rm_speed), 0)
+        self.lm_speed = max(min(99, self.lm_speed), 0)
+        self.rm_speed = max(min(99, self.key_pressrm_speed), 0)
 
         self.motor_control.change_speed(lm_speed,rm_speed)
 
     def print_ticks(self,ticks):
         '''
-        utility function to print the tick data from the encoder
+        utility print function to print the tick data from the encoder
         '''
         print("LEFT WHEEL A CLICKS: ",ticks[0])
         print("LEFT WHEEL B CLICKS: ",ticks[1])
@@ -51,7 +58,7 @@ class Driver:
 
     def print_error(self,la_error,lb_error,ra_error,rb_error):
         '''
-        Utility function to print out encoder error
+        Utility print function to print out encoder error
         '''
         print("LEFT A ENCODER ERROR: ", la_error)
         print("LEFT B ENCODER ERROR: ", lb_error)
@@ -95,109 +102,76 @@ class Driver:
 
     def key_press(self,key):
         '''
-        Listen to key presss
+        keyboard listener for teleop
         '''
-        # lm_speed = self.motor_control.lm_speed
-        # rm_speed = self.motor_control.rm_speed
-
-        print("LEFT SPEED ON KEY PRESS ", self.lm_speed)
-        print("RIGHT SPEED ON KEY PRESS ", self.rm_speed)
-
+        # start the motor
         if key.name == "enter":
             self.motor_control.start(0)
-
+        # kill the program
         elif key.name == "delete":
             self.motor_control.end(0)
-
+        # turn the motor left
+        # NOTE: when increasing right motor speed, left must be restored to default
         elif key.name == "left":
+            self.lm_speed = self.cruising_speed
             self.rm_speed += 1
-
+        # NOTE: when increasing right motor speed, right must be restored to cruise
         elif key.name == "right":
             self.lm_speed += 1
-
+            self.rm_speed = self.cruising_speed
+        # increase the crusing speed
         elif key.name == "up":
-            self.lm_speed +=1
-            self.rm_speed +=1
-
+            self.cruising_speed += 1
+            self.lm_speed = self.cruising_speed
+            self.rm_speed = self.cruising_speed
+        # decrease the cruising speed
         elif key.name == "down":
-            self.lm_speed -= 1
-            self.rm_speed -= 1
-
+            self.cruising_speed -= 1
+            self.lm_speed = self.cruising_speed
+            self.rm_speed = self.cruising_speed
+        # restor to default speed
         elif key.name == "z":
-            self.lm_speed = 20
-            self.rm_speed = 20    
-
+            self.lm_speed = self.cruising_speed
+            self.rm_speed = self.cruising_speed    
+        # reverse
+        elif key.name == "r":
+            self.motor_control.change_direction()
+        # change to updated speed    
         self.motor_control.change_speed(self.lm_speed,self.rm_speed)
 
-    def main(self):
-        # NOTE: following code is for camera module that is not implemented yet
-        # Set up camera module
-        # camera = PiCamera()
-        # TODO: Figure out what resolution works well
-        #camera.resolution = (1024, 768)
-        # camera.start_preview()
-
-        # user instructions
-        print("BUTTON 1 START MOTORS")
-        print("BUTTON 2 STOPS MOTORS")
-        print("BUTTON 3 ENDS EXECUTION")
-        print("BUTTON 4 DRIVES ROBOT IN SPIN MODE")
-
-        # get necessary objects
-        encoder = Encoder()
-        # set initial speed of motors to 20 each 
-
-        # event handlers for when the bumb buttons are clicked
-        GPIO.add_event_detect(C["BUTTON1"],GPIO.FALLING, callback = self.motor_control.start,bouncetime = 500)
-        GPIO.add_event_detect(C["BUTTON2"],GPIO.FALLING, callback = self.motor_control.stop_motors,bouncetime = 500)
-        GPIO.add_event_detect(C["BUTTON3"],GPIO.FALLING, callback = self.motor_control.end,bouncetime = 200)
-        GPIO.add_event_detect(C["BUTTON4"],GPIO.FALLING, callback = self.motor_control.drive_spin,bouncetime = 200)
-        GPIO.add_event_detect(C["BUTTON5"],GPIO.FALLING, callback = self.motor_control.not_defined,bouncetime = 200)
-        GPIO.add_event_detect(C["BUTTON6"],GPIO.FALLING, callback = self.motor_control.not_defined,bouncetime = 200)
-
+    def add_interrupts(self):
+        # robot should reverse when it hits something
+        GPIO.add_event_detect(C["BUTTON1"],GPIO.FALLING, callback = self.motor_control.change_direction,bouncetime = 500)
+        GPIO.add_event_detect(C["BUTTON2"],GPIO.FALLING, callback = self.motor_control.change_direction,bouncetime = 500)
+        GPIO.add_event_detect(C["BUTTON3"],GPIO.FALLING, callback = self.motor_control.change_direction,bouncetime = 200)
+        GPIO.add_event_detect(C["BUTTON4"],GPIO.FALLING, callback = self.motor_control.change_direction,bouncetime = 200)
+        GPIO.add_event_detect(C["BUTTON5"],GPIO.FALLING, callback = self.motor_control.change_direction,bouncetime = 200)
+        GPIO.add_event_detect(C["BUTTON6"],GPIO.FALLING, callback = self.motor_control.change_direction,bouncetime = 200)
         # event handlers for recieving encoder data
-        GPIO.add_event_detect(C["RIGHT_ENCODER_A"],GPIO.BOTH, callback = encoder.read_encoder)
-        GPIO.add_event_detect(C["RIGHT_ENCODER_B"],GPIO.BOTH, callback = encoder.read_encoder)
-        GPIO.add_event_detect(C["LEFT_ENCODER_A"],GPIO.BOTH, callback = encoder.read_encoder)
-        GPIO.add_event_detect(C["LEFT_ENCODER_B"],GPIO.BOTH, callback = encoder.read_encoder)
+        GPIO.add_event_detect(C["RIGHT_ENCODER_A"],GPIO.BOTH, callback = self.encoder.read_encoder)
+        GPIO.add_event_detect(C["RIGHT_ENCODER_B"],GPIO.BOTH, callback = self.encoder.read_encoder)
+        GPIO.add_event_detect(C["LEFT_ENCODER_A"],GPIO.BOTH, callback =  self.encoder.read_encoder)
+        GPIO.add_event_detect(C["LEFT_ENCODER_B"],GPIO.BOTH, callback =  self.encoder.read_encoder)
 
-        # keyboard listener
-        keyboard.on_press(self.key_press)
-
-        # NOTE: sensors are not currently being used
-        # GPIO.setup(C["LINE_SENSOR_1"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
-        # GPIO.setup(C["LINE_SENSOR_2"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
-        # GPIO.setup(C["LINE_SENSOR_4"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
-        # GPIO.setup(C["LINE_SENSOR_5"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
-        # GPIO.setup(C["LINE_SENSOR_7"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
-        # GPIO.setup(C["LINE_SENSOR_8"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
-
+    def drive(self):
+        if self.drive_mode:
+            # keyboard listener
+            keyboard.on_press(self.key_press)
+        else:
+            self.motor_control.change_speed(self.cruising_speed,self.cruising_speed) 
         SLEEP_TIME = 1
-        target_ticks = 2770
-        kp = 0.00002
-
         while True:
             sleep(SLEEP_TIME)
             # get tick data form the encoder class
-            #ticks = encoder.return_ticks()
+            # ticks = encoder.return_ticks()
             # print_ticks(ticks)
-            # calbirate the encoder
-            #calibrate_encoders(motor_control,encoder,1)
-            #pid(target_ticks,kp,ticks)
-            self.motor_control.change_speed(self.lm_speed,self.rm_speed)
-            print("LM SPEED" , self.lm_speed)
-            print("RM SPEED" , self.rm_speed)
-            encoder.reset()
+            # calibrate_encoders(motor_control,encoder,1)
+            # pid(target_ticks,kp,ticks)
+            # self.encoder.reset()
 
-            print('LOOP ITERATION ------------------------------\n')
+    
 
-            # NOTE: CV not implemented yet
-            # img = camera.capture('image.jpg')
-            # see if any signs are detected in image
-            #if detect_signs():
-            #    print("Signs Detected")
-            # else:
-            #   print("Signs not detected")
+    
     
 
 

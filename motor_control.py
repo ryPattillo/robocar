@@ -23,9 +23,10 @@ class MotorControl:
         # motors initially should be stopped
         self.right_motor.stop()
         self.left_motor.stop()
-        
+        # should initially be going forward
+        self.dir = 0      
 
-    def start(self,channel):
+    def start(self,start_lm,start_rm):
         '''
         call back for starting the motors
         start will set the direction and turn off sleep but not change speed
@@ -33,14 +34,14 @@ class MotorControl:
         # NOTE: The motors are not being start up for some reason
         print("MOTORS STARTING UP........")
         # sleep should be disabled 
-        GPIO.output(C["LEFT_MOTOR_DIR"], 0)
-        GPIO.output(C["RIGHT_MOTOR_DIR"], 0)
+        GPIO.output(C["LEFT_MOTOR_DIR"], self.dir)
+        GPIO.output(C["RIGHT_MOTOR_DIR"], self.dir)
 
         GPIO.output(C["RIGHT_MOTOR_SLP"], 1)
         GPIO.output(C["LEFT_MOTOR_SLP"], 1)
         # motors started with a duty cycle of 50%
-        self.left_motor.start(0)
-        self.right_motor.start(0)
+        self.left_motor.start(start_lm)
+        self.right_motor.start(start_rm)
         # mark that motors have started
         self.started = True    
 
@@ -53,18 +54,12 @@ class MotorControl:
         self.right_motor.stop()
         self.started = False
 
-    def drive_spin(self,channel):
+    def change_direction(self,channel):
         '''
-        callback for driving robot in spin mode
+        change the current direction of the robot
         '''
-        # left motor will go in reverse and right will go forward
-        GPIO.output(C["LEFT_MOTOR_DIR"], 1)
-        GPIO.output(C["RIGHT_MOTOR_DIR"], 0)
-        # start motors with duty cycle 50%
-        self.left_motor.start(self.speed)
-        self.right_motor.start(self.speed)
-
-        self.started = True
+        GPIO.output(C["LEFT_MOTOR_DIR"], not self.dir)
+        GPIO.output(C["RIGHT_MOTOR_DIR"], not self.dir)
 
     def not_defined(self,channel):
         '''
@@ -90,6 +85,9 @@ class MotorControl:
         if speed_lm >= 99 or speed_rm >= 99:
             print("motors cannot go any faster")
             return
+        if speed_lm <= 0 or speed_rm <- 0:
+            print("motors cannot go any slower")
+            return     
 
         if self.started:
             print("LEFT MOTOR SPEED BEING ADJUSTED TO ",speed_lm,"%")
@@ -98,16 +96,3 @@ class MotorControl:
             self.right_motor.ChangeDutyCycle(speed_rm)
         else:
             print("MOTORS HAVE NOT BEEN STARTED")    
-
-    def turn_left(self):
-        '''
-        turn robot left
-        '''
-        self.left_motor.ChangeDutyCycle(0)
-        sleep(0.5)
-    def turn_right(self):
-        '''
-        turn robot right
-        '''
-        self.right_motor.ChangeDutyCycle(0)
-        sleep(0.5)

@@ -1,13 +1,11 @@
 
 
 from driver import Driver
-import keyboard
 from pin_setup import setup
-
 # Configure all the pins
 setup()
-
 if __name__ == "__main__":
     driver = Driver()
-    driver.main()
-   
+    drive_mode = input("[1] for teleop, [0] for freeroam")
+    driver.main(drive_mode)
+    
