@@ -2,11 +2,13 @@ import RPi.GPIO as GPIO
 
 from constant import CONSTANTS as C
 from pin_setup import setup
-from imageReader import detect_signs
+#from imageReader import detect_signs
 from encoder import Encoder
 
-class MotorControl:
+from time import sleep
 
+class MotorControl:
+    # keep track of if motors have been started
     started = False
 
     def __init__(self,speed):
@@ -25,18 +27,21 @@ class MotorControl:
 
     def start(self,channel):
         '''
-        call back for starting the motors forward
+        call back for starting the motors
+        start will set the direction and turn off sleep but not change speed
         '''
-
         # NOTE: The motors are not being start up for some reason
         print("MOTORS STARTING UP........")
         # sleep should be disabled 
+        GPIO.output(C["LEFT_MOTOR_DIR"], 0)
+        GPIO.output(C["RIGHT_MOTOR_DIR"], 0)
+
         GPIO.output(C["RIGHT_MOTOR_SLP"], 1)
         GPIO.output(C["LEFT_MOTOR_SLP"], 1)
         # motors started with a duty cycle of 50%
         self.left_motor.start(0)
         self.right_motor.start(0)
-
+        # mark that motors have started
         self.started = True    
 
     def stop_motors(self,channel):
@@ -55,7 +60,6 @@ class MotorControl:
         # left motor will go in reverse and right will go forward
         GPIO.output(C["LEFT_MOTOR_DIR"], 1)
         GPIO.output(C["RIGHT_MOTOR_DIR"], 0)
-
         # start motors with duty cycle 50%
         self.left_motor.start(self.speed)
         self.right_motor.start(self.speed)
@@ -71,8 +75,7 @@ class MotorControl:
     def end(self,channel):
         ''' 
         cleanly exit the program and clear defined pins
-        '''
-        
+        '''        
         # stop the motors
         self.left_motor.stop()
         self.right_motor.stop()
@@ -83,6 +86,11 @@ class MotorControl:
         '''
         change the speed of the motors
         '''
+
+        if speed_lm >= 99 or speed_rm >= 99:
+            print("motors cannot go any faster")
+            return
+
         if self.started:
             print("LEFT MOTOR SPEED BEING ADJUSTED TO ",speed_lm,"%")
             print("RIGHT MOTOR SPEED BEING ADJUSTED TO ",speed_rm,"%")
@@ -90,3 +98,16 @@ class MotorControl:
             self.right_motor.ChangeDutyCycle(speed_rm)
         else:
             print("MOTORS HAVE NOT BEEN STARTED")    
+
+    def turn_left(self):
+        '''
+        turn robot left
+        '''
+        self.left_motor.ChangeDutyCycle(0)
+        sleep(0.5)
+    def turn_right(self):
+        '''
+        turn robot right
+        '''
+        self.right_motor.ChangeDutyCycle(0)
+        sleep(0.5)
