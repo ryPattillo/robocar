@@ -32,7 +32,8 @@ class MotorControl:
         start will set the direction and turn off sleep but not change speed
         '''
         # NOTE: The motors are not being start up for some reason
-        print("MOTORS STARTING UP........")
+        print("LEFT MOTOR SPEED BEING ADJUSTED TO ",speed_lm,"%")
+        print("RIGHT MOTOR SPEED BEING ADJUSTED TO ",speed_rm,"%")
         # sleep should be disabled 
         GPIO.output(C["LEFT_MOTOR_DIR"], self.dir)
         GPIO.output(C["RIGHT_MOTOR_DIR"], self.dir)
@@ -62,12 +63,6 @@ class MotorControl:
         GPIO.output(C["LEFT_MOTOR_DIR"], self.dir)
         GPIO.output(C["RIGHT_MOTOR_DIR"], self.dir)
 
-    def not_defined(self,channel):
-        '''
-        callback that currently
-        '''
-        print("BUTTON IS NOT BEING USED")
-
     def end(self,channel):
         ''' 
         cleanly exit the program and clear defined pins
@@ -82,14 +77,12 @@ class MotorControl:
         '''
         change the speed of the motors
         '''
-
         if speed_lm >= 99 or speed_rm >= 99:
             print("motors cannot go any faster")
             return
         if speed_lm <= 0 or speed_rm <- 0:
             print("motors cannot go any slower")
             return     
-
         if self.started:
             print("LEFT MOTOR SPEED BEING ADJUSTED TO ",speed_lm,"%")
             print("RIGHT MOTOR SPEED BEING ADJUSTED TO ",speed_rm,"%")

@@ -156,12 +156,10 @@ class Driver:
     def drive(self):
 
         self.add_interrupts()
-        print(self.drive_mode)
         if self.drive_mode == 1:
             # keyboard listener
             keyboard.on_press(self.key_press)
         else:
-            print("test")
             # just cruise
             self.motor_control.start(self.cruising_speed,self.cruising_speed)
 
