@@ -133,11 +133,17 @@ class Driver:
             self.rm_speed = self.cruising_speed
         # restor to default speed
         elif key.name == "z":
-            self.lm_speed = self.cruising_speed
-            self.rm_speed = self.cruising_speed    
+            self.cruising_speed = 10
+            self.lm_speed = 10
+            self.rm_speed = 10   
         # reverse
         elif key.name == "r":
             self.motor_control.change_direction(0)
+        elif key.name == "n":
+            self.cruising_speed += 15
+            self.lm_speed = self.cruising_speed
+            self.rm_speed = self.cruising_speed
+     
         # change to updated speed    
         self.motor_control.change_speed(self.lm_speed,self.rm_speed)
 
