@@ -9,9 +9,9 @@ class Encoder:
     self.ticks_ra = 0
     
   def read_encoder(self,channel):
-      '''
-      callback for reading encoder data
-      '''
+      """ callback for reading encoder data
+      """
+      
       # keep track of total clicks
       if channel == C["LEFT_ENCODER_A"]:
           self.ticks_la += 1

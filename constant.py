@@ -28,13 +28,6 @@ CONSTANTS = {
     "RIGHT_ENCODER_A":25,
     "RIGHT_ENCODER_B":26,
 
-    # NOTE: line sensors are not currently being used
-    # Line sensor definitions (1 starting from the left-most sensor)
-    # "LINE_SENSOR_2":8,
-    # "LINE_SENSOR_4":7,
-    # "LINE_SENSOR_5":12,
-    # "LINE_SENSOR_7":16,
-    # "LINE_SENSOR_8":20,
 }
 
 

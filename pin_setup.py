@@ -7,11 +7,10 @@ def setup():
     all in the driver file
     '''
     GPIO.setwarnings(False)
-
     # Set mode
     GPIO.setmode(GPIO.BCM)
 
-    # Configure Bumb Sensors
+    # Bumb Sensors
     # NOTE: Pull up resistors: put the power between +V and signal
     # NOTE: Pull down resistors: Put in between +v and ground (-v) 
     GPIO.setup(C["BUTTON1"], GPIO.IN)
@@ -36,15 +35,3 @@ def setup():
     GPIO.setup(C["LEFT_ENCODER_B"], GPIO.IN,pull_up_down = GPIO.PUD_UP)
     GPIO.setup(C["RIGHT_ENCODER_A"],GPIO.IN,pull_up_down = GPIO.PUD_UP)
     GPIO.setup(C["RIGHT_ENCODER_B"],GPIO.IN,pull_up_down = GPIO.PUD_UP)
-
-    # NOTE: the following code is for the line sensors which we are not using currently
-    # The led needed for the light sensors to work
-    # GPIO.setup(C["LINE_SENSOR_LED"], GPIO.OUT)
-    # Allow for input from each of the sensors
-    # GPIO.setup(C["LINE_SENSOR_1"], GPIO.IN,pull_up_down = GPIO.PUD_DOWN)
-    # GPIO.setup(C["LINE_SENSOR_2"], GPIO.IN,pull_up_down = GPIO.PUD_DOWN)
-    # GPIO.setup(C["LINE_SENSOR_4"], GPIO.IN,pull_up_down = GPIO.PUD_DOWN)
-    # GPIO.setup(C["LINE_SENSOR_5"], GPIO.IN,pull_up_down = GPIO.PUD_DOWN)
-    # GPIO.setup(C["LINE_SENSOR_7"], GPIO.IN,pull_up_down = GPIO.PUD_DOWN)
-    # GPIO.setup(C["LINE_SENSOR_8"], GPIO.IN,pull_up_down = GPIO.PUD_DOWN)
-
