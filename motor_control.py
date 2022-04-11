@@ -61,6 +61,14 @@ class MotorControl:
         else:
             print("MOTORS ARE ALREADY STOPPED")
 
+    def reverse(self):
+        if self.dir:
+            self.change_direction(0)
+        else:
+            print("ALREADY GOING BACKWARDS")
+            return False
+        return True
+        
     def change_direction(self,channel):
         """ change the current direction of the robot
         """
@@ -78,7 +86,7 @@ class MotorControl:
         """ Cleanly exit the program and clear pins 
         that have been defined
         """    
-        
+
         # stop the motors
         self.left_motor.stop()
         self.right_motor.stop()
@@ -93,7 +101,7 @@ class MotorControl:
             if speed_lm >= 99 or speed_rm >= 99:
                 print("MOTORS AT MAX SPEED")
                 return
-            elif speed_lm <= 0 or speed_rm <- 0:
+            elif speed_lm <= 0 or speed_rm <= 0:
                 print("MOTORS AT MIN SPEED")
                 return     
             else:

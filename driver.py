@@ -4,15 +4,17 @@ encoder information
 """
 import RPi.GPIO as GPIO
 from time import sleep
+from picamera import PiCamera
+import keyboard
+
 
 from constant import CONSTANTS as C
 from pin_setup import setup
 from encoder import Encoder
 from motor_control import MotorControl
-import keyboard
 
 # NOTE: uncomment if time for CV
-# from imageReader import detect_signs
+from imageReader import detect_signs
 
 class Driver: 
  
@@ -24,7 +26,7 @@ class Driver:
         self.drive_mode = drive_mode
         self.encoder = Encoder()
  
-    def pid(self,target,kp,ticks):
+    def pid(self,ticks):
         """ Calculate new speed based on encoder data, target, and kp. 
         Used for stabilization on freeroam
         """
@@ -32,10 +34,10 @@ class Driver:
         # The ticks that the encoders should be reading
         target_ticks = 2770
         # How much to update the speed based on error
-        kp = 0.00002
+        kp = 0.0002
 
-        lm_speed = self.motor_control.lm_speed
-        rm_speed = self.motor_control.rm_speed
+        self.lm_speed = self.lm_speed
+        self.rm_speed = self.rm_speed
 
         la_error = target_ticks - ticks[0]
         lb_error = target_ticks - ticks[1]
@@ -47,9 +49,9 @@ class Driver:
 
         # Ensure we do not set speed faster than 99 or lower than 0
         self.lm_speed = max(min(99, self.lm_speed), 0)
-        self.rm_speed = max(min(99, self.key_pressrm_speed), 0)
+        self.rm_speed = max(min(99, self.rm_speed), 0)
 
-        self.motor_control.change_speed(lm_speed,rm_speed)
+        self.motor_control.change_speed(self.lm_speed,self.rm_speed)
 
     def print_ticks(self,ticks):
         """ Utility print function to print the tick data from the encoder
@@ -77,7 +79,7 @@ class Driver:
         this used to vsee how the change in duty cycle will affect the encoder readings
         this information will help me get encoder duty cycle info from encoders
         '"""
-        
+
         ticks = (0,0,0,0)
 
         if self.motor_control.started:
@@ -120,20 +122,28 @@ class Driver:
             self.motor_control.end(0)
         # turn the motor left
         # NOTE: when increasing right motor speed, left must be restored to default
-        elif key.name == "left":
+        elif key.name == "a":
             self.lm_speed = self.cruising_speed
             self.rm_speed += 1
         # NOTE: when increasing right motor speed, right must be restored to cruise
-        elif key.name == "right":
+        elif key.name == "d":
             self.lm_speed += 1
             self.rm_speed = self.cruising_speed
         # increase the crusing speed
-        elif key.name == "up":
-            self.cruising_speed += 1
-            self.lm_speed = self.cruising_speed
-            self.rm_speed = self.cruising_speed
+        elif key.name == "w":
+       
+            if self.cruising_speed <= 0 and self.motor_control.dir:
+                self.motor_control.change_direction(0)
+            elif self.motor_control.dir:
+                self.cruising_speed -= 3
+                self.lm_speed = self.cruising_speed
+                self.rm_speed = self.cruising_speed
+            else:
+                self.cruising_speed += 3
+                self.lm_speed = self.cruising_speed
+                self.rm_speed = self.cruising_speed
         # decrease the cruising speed
-        elif key.name == "down":
+        elif key.name == "z":
             self.cruising_speed -= 1
             self.lm_speed = self.cruising_speed
             self.rm_speed = self.cruising_speed
@@ -143,8 +153,18 @@ class Driver:
             self.lm_speed = 10
             self.rm_speed = 10   
         # reverse
-        elif key.name == "return":
-            self.motor_control.change_direction(0)
+        elif key.name == "s":
+            if self.cruising_speed <= 0 and not self.motor_control.dir:
+                self.motor_control.change_direction(0)
+            elif not self.motor_control.dir:
+                self.cruising_speed -= 5
+                self.lm_speed = self.cruising_speed
+                self.rm_speed = self.cruising_speed
+            else:
+                self.cruising_speed += 5
+                self.lm_speed = self.cruising_speed
+                self.rm_speed = self.cruising_speed
+
         # nitrous    
         elif key.name == "space":
             self.cruising_speed += 15
@@ -174,6 +194,15 @@ class Driver:
         # Ensure interrupts are setup
         self.add_interrupts()
 
+        # NOTE: following code is for camera module that is not implemented yet
+        # Set up camera module
+        camera = PiCamera()
+        # TODO: Figure out what resolution works well
+        camera.resolution = (1024, 768)
+        camera.start_preview()
+
+        # NOTE: CV not implemented yet
+            
         if self.drive_mode == 0:
             # start the motor at a default cruising spped
             self.motor_control.start(self.cruising_speed,self.cruising_speed)
@@ -186,12 +215,19 @@ class Driver:
         # sleep for a certain amount of time in while loop                  
         SLEEP_TIME = 1
         while True:
-            sleep(SLEEP_TIME)
+
             # free drive mode
             if self.drive_mode == 0:
-                # free-roam should utlize stablization
-                ticks = self.encoder.return_ticks()
-                self.pid(ticks)
+                camera.capture('image.jpeg')
+                #see if any signs are detected in image
+                if detect_signs():
+                    print("Signs Detected")
+                else:
+                    print("Signs not detected")   
+                #free-roam should utlize stablization
+                # ticks = self.encoder.return_ticks()
+                #self.pid(ticks)
+                
             # teleop mode
             elif self.drive_mode == 1: 
                 pass
@@ -201,6 +237,8 @@ class Driver:
             # calibration mode
             elif self.drive_mode == 3:
                 self.calibrate_encoders()
+
+            sleep(SLEEP_TIME)
 
             self.encoder.reset()
 

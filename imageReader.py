@@ -38,7 +38,7 @@ def find_squares(contours):
 def detect_signs():
 
     # read in image
-    original_img = cv2.imread("shapes.png")
+    original_img = cv2.imread("image.jpeg")
 
     # pre process the image
     img = pre_process(original_img)
@@ -54,3 +54,5 @@ def detect_signs():
         return True
     else:
         return False
+
+detect_signs()
