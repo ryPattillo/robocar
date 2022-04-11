@@ -27,12 +27,6 @@ class Driver:
         self.encoder = Encoder()
         self.camera = PiCamera()
         self.camera.resolution = (1024, 768)
-
-    def capture_image(self):
-        # curr_time = datetime.now()
-        image_name = "test.jpg"
-         #  + curr_time.strftime("%d-%m-%y:%S")  
-        self.camera.capture(image_name)
  
     def pid(self,ticks):
         """ Calculate new speed based on encoder data, target, and kp. 
@@ -168,8 +162,8 @@ class Driver:
             self.rm_speed = 10   
         # capture an image        
         elif key.name == "tab":
-            self.capture_image()
-            find_people()
+            self.camera.capture('images/spycam.jpg')
+            find_people('images/spycam.jpg')
         # nitrous    
         elif key.name == "space":
             self.cruising_speed += 15
@@ -212,35 +206,29 @@ class Driver:
         # Delays                
         SLEEP_TIME = 1
         CAMERA_DELAY = 1
-
         while True:
             # free drive mode
             if self.drive_mode == 0:
                 # capture image to be used as sign detection
-                self.camera.capture('signs.jpg')
+                self.camera.capture('images/signs.jpg')
                 # sleep to let picture
                 sleep(CAMERA_DELAY)
                 #see if any signs are detected in image
-                if detect_signs():
-                    # stop if sign is detected
-                    self.motor_control.end(0)
-                    print("Signs Detected")
+                stop_sign, start_sign = detect_signs('images/signs.jpg')
+                if stop_sign > 0:
+                    print("STOP SIGN DETECTED")
+                    self.motor_control.start(self.lm_speed,self.rm_speed)
+                if start_sign > 0:
+                    print("START SIGN DETECTED")
+                    self.motor_control.stop_motors(0)
                 else:
                     print("Signs not detected")   
-                #free-roam should utlize stablization
-                # ticks = self.encoder.return_ticks()
-                #self.pid(ticks) 
-            # teleop mode
-            elif self.drive_mode == 1: 
-                pass
-            # path planning
-            elif self.drive_mode == 2:
-                pass
             # calibration mode
             elif self.drive_mode == 3:
                 self.calibrate_encoders()
-
+            # sleep for specified time
             sleep(SLEEP_TIME)
+            # make sure all the encoders are set
             self.encoder.reset()
 
     
