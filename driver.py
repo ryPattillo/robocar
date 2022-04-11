@@ -6,7 +6,7 @@ import RPi.GPIO as GPIO
 from time import sleep
 from picamera import PiCamera
 import keyboard
-
+import datetime
 
 from constant import CONSTANTS as C
 from pin_setup import setup
@@ -14,7 +14,7 @@ from encoder import Encoder
 from motor_control import MotorControl
 
 # NOTE: uncomment if time for CV
-from imageReader import detect_signs
+from computer_vision import detect_signs, find_people
 
 class Driver: 
  
@@ -25,6 +25,14 @@ class Driver:
         self.cruising_speed = cruising_speed
         self.drive_mode = drive_mode
         self.encoder = Encoder()
+        self.camera = PiCamera()
+        self.camera.resolution = (1024, 768)
+
+    def capture_image(self):
+        # curr_time = datetime.now()
+        image_name = "image.jpeg"
+         #  + curr_time.strftime("%d-%m-%y:%S")  
+        self.camera.capture(image_name)
  
     def pid(self,ticks):
         """ Calculate new speed based on encoder data, target, and kp. 
@@ -129,9 +137,8 @@ class Driver:
         elif key.name == "d":
             self.lm_speed += 1
             self.rm_speed = self.cruising_speed
-        # increase the crusing speed
+        # forward drive
         elif key.name == "w":
-       
             if self.cruising_speed <= 0 and self.motor_control.dir:
                 self.motor_control.change_direction(0)
             elif self.motor_control.dir:
@@ -142,17 +149,7 @@ class Driver:
                 self.cruising_speed += 3
                 self.lm_speed = self.cruising_speed
                 self.rm_speed = self.cruising_speed
-        # decrease the cruising speed
-        elif key.name == "z":
-            self.cruising_speed -= 1
-            self.lm_speed = self.cruising_speed
-            self.rm_speed = self.cruising_speed
-        # emergency break
-        elif key.name == "shift":
-            self.cruising_speed = 10
-            self.lm_speed = 10
-            self.rm_speed = 10   
-        # reverse
+        # reverse drive
         elif key.name == "s":
             if self.cruising_speed <= 0 and not self.motor_control.dir:
                 self.motor_control.change_direction(0)
@@ -164,7 +161,15 @@ class Driver:
                 self.cruising_speed += 5
                 self.lm_speed = self.cruising_speed
                 self.rm_speed = self.cruising_speed
-
+        # emergency break
+        elif key.name == "shift":
+            self.cruising_speed = 10
+            self.lm_speed = 10
+            self.rm_speed = 10   
+        # capture an image        
+        elif key.name == "tab":
+            self.capture_image()
+            self.find_people()
         # nitrous    
         elif key.name == "space":
             self.cruising_speed += 15
@@ -194,15 +199,6 @@ class Driver:
         # Ensure interrupts are setup
         self.add_interrupts()
 
-        # NOTE: following code is for camera module that is not implemented yet
-        # Set up camera module
-        camera = PiCamera()
-        # TODO: Figure out what resolution works well
-        camera.resolution = (1024, 768)
-        camera.start_preview()
-
-        # NOTE: CV not implemented yet
-            
         if self.drive_mode == 0:
             # start the motor at a default cruising spped
             self.motor_control.start(self.cruising_speed,self.cruising_speed)
@@ -212,13 +208,18 @@ class Driver:
         elif self.drive_mode == 2:
             # instructed mode
             pass
-        # sleep for a certain amount of time in while loop                  
-        SLEEP_TIME = 1
-        while True:
 
+        # Delays                
+        SLEEP_TIME = 1
+        CAMERA_DELAY = 1
+
+        while True:
             # free drive mode
             if self.drive_mode == 0:
-                camera.capture('image.jpeg')
+                # capture image to be used as sign detection
+                self.camera.capture('image.jpeg')
+                # sleep to let picture
+                sleep(CAMERA_DELAY)
                 #see if any signs are detected in image
                 if detect_signs():
                     print("Signs Detected")
@@ -226,8 +227,7 @@ class Driver:
                     print("Signs not detected")   
                 #free-roam should utlize stablization
                 # ticks = self.encoder.return_ticks()
-                #self.pid(ticks)
-                
+                #self.pid(ticks) 
             # teleop mode
             elif self.drive_mode == 1: 
                 pass
@@ -239,7 +239,6 @@ class Driver:
                 self.calibrate_encoders()
 
             sleep(SLEEP_TIME)
-
             self.encoder.reset()
 
     
