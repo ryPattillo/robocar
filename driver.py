@@ -30,7 +30,7 @@ class Driver:
 
     def capture_image(self):
         # curr_time = datetime.now()
-        image_name = "image.jpeg"
+        image_name = "test.jpg"
          #  + curr_time.strftime("%d-%m-%y:%S")  
         self.camera.capture(image_name)
  
@@ -217,11 +217,13 @@ class Driver:
             # free drive mode
             if self.drive_mode == 0:
                 # capture image to be used as sign detection
-                self.camera.capture('image.jpeg')
+                self.camera.capture('signs.jpg')
                 # sleep to let picture
                 sleep(CAMERA_DELAY)
                 #see if any signs are detected in image
                 if detect_signs():
+                    # stop if sign is detected
+                    self.motor_control.end(0)
                     print("Signs Detected")
                 else:
                     print("Signs not detected")   

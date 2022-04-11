@@ -2,20 +2,19 @@ import cv2
 import numpy as np
 
 def find_people():
-    # Load the cascade
-    # Read the input image
-    img = cv2.imread('image.jpeg')
-    # Convert into grayscale
+    img = cv2.imread('test.jpg')
+    img = cv2.flip(img,0)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     # Detect faces
-    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+
+    face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
     faces = face_cascade.detectMultiScale(gray, 1.1, 4)
 
     # Draw rectangle around the faces
     for (x, y, w, h) in faces:
         cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
     # Display the output
-    cv2.imwrite("face_detection.jpeg",img)
+    cv2.imwrite("face_detection.jpg",img)
 
 def pre_process(img):
 
@@ -54,7 +53,8 @@ def find_squares(contours):
 def detect_signs():
 
     # read in image
-    original_img = cv2.imread("image.jpeg")
+    original_img = cv2.imread("signs.jpg")
+    original_img = cv2.flip(original_img,0)
 
     # pre process the image
     img = pre_process(original_img)
@@ -62,10 +62,12 @@ def detect_signs():
     # find the contours in the image
     _,contours,_ = cv2.findContours(img, 
         cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-    # get the squares in the image
     squares = find_squares(contours)
 
+    cv2.drawContours(original_img, squares, -1, (0, 255, 0), 3)
+    # get the squares in the image
+
+    cv2.imwrite("obj_detection.jpg",original_img)
     if len(squares) != 0:
         return True
     else:
