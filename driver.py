@@ -169,7 +169,7 @@ class Driver:
         # capture an image        
         elif key.name == "tab":
             self.capture_image()
-            self.find_people()
+            find_people()
         # nitrous    
         elif key.name == "space":
             self.cruising_speed += 15
