@@ -14,7 +14,7 @@ from encoder import Encoder
 from motor_control import MotorControl
 
 # NOTE: uncomment if time for CV
-from computer_vision import detect_signs, find_people
+from computer_vision import detect_signs, detect_faces
 
 class Driver: 
  
@@ -163,7 +163,7 @@ class Driver:
         # capture an image        
         elif key.name == "tab":
             self.camera.capture('images/spycam.jpg')
-            find_people('images/spycam.jpg')
+            detect_faces('images/spycam.jpg')
         # nitrous    
         elif key.name == "space":
             self.cruising_speed += 15
