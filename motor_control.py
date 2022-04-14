@@ -69,6 +69,19 @@ class MotorControl:
             return False
         return True
         
+    def turn_around(self,channel):
+        """ Turn the robot around
+        """
+
+        # start going backward
+        self.change_direction(0)
+        # increase spped to turn
+        self.change_speed(40,20)
+        sleep(1)
+        # restore speed back
+        self.change_speed(30,30)
+        self.change_direction(0)
+
     def change_direction(self,channel):
         """ change the current direction of the robot
         """
@@ -98,10 +111,10 @@ class MotorControl:
         """
 
         if self.started:
-            if speed_lm >= 99 or speed_rm >= 99:
+            if speed_lm >99 or speed_rm > 99:
                 print("MOTORS AT MAX SPEED")
                 return
-            elif speed_lm <= 0 or speed_rm <= 0:
+            elif speed_lm < 0 or speed_rm < 0:
                 print("MOTORS AT MIN SPEED")
                 return     
             else:

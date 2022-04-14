@@ -7,6 +7,8 @@ from time import sleep
 from picamera import PiCamera
 import keyboard
 import datetime
+from picamera.array import PiRGBArray
+
 
 from constant import CONSTANTS as C
 from pin_setup import setup
@@ -26,7 +28,9 @@ class Driver:
         self.drive_mode = drive_mode
         self.encoder = Encoder()
         self.camera = PiCamera()
-        self.camera.resolution = (1024, 768)
+        self.camera.resolution = (1080,768)
+
+        #self.camera.awb_mode = 'off'
  
     def pid(self,ticks):
         """ Calculate new speed based on encoder data, target, and kp. 
@@ -54,6 +58,45 @@ class Driver:
         self.rm_speed = max(min(99, self.rm_speed), 0)
 
         self.motor_control.change_speed(self.lm_speed,self.rm_speed)
+
+
+    def update_speed(self,lm_update,rm_update):
+        ''' Update left motor and right motor speed
+        '''
+
+        print('current speed', self.lm_speed)
+        print('current speed', self.rm_speed)
+        print('update', lm_update)
+        print('update', rm_update)
+
+
+        if self.lm_speed + lm_update > 99:
+            print("LEFT MOTOR AT MAX SPEED")
+        elif self.lm_speed + lm_update < 0:
+            print("LEFT MOTOR AT MIN SPEED")
+        else:    
+            self.lm_speed += lm_update
+
+        if self.rm_speed + rm_update > 99:
+            print("RIGHT MOTOR AT MAX SPEED")
+        elif self.rm_speed + rm_update < 0:
+            print("RIGHT MOTOR AT MIN SPEED")
+        else:
+            self.rm_speed += rm_update
+
+
+    def turn_around(self,channel):
+        """ Turn the robot around
+        """
+
+        # start going backward
+        self.motor_control.change_direction(0)
+        # increase spped to turn
+        self.motor_control.change_speed(10,60)
+        sleep(.75)
+        # restore speed back
+        self.motor_control.change_speed(self.cruising_speed,self.cruising_speed)
+        self.motor_control.change_direction(0)
 
     def print_ticks(self,ticks):
         """ Utility print function to print the tick data from the encoder
@@ -178,11 +221,10 @@ class Driver:
 
         # robot should reverse when it hits something
         GPIO.add_event_detect(C["BUTTON1"],GPIO.FALLING, callback = self.motor_control.end,bouncetime = 500)
-        GPIO.add_event_detect(C["BUTTON2"],GPIO.FALLING, callback = self.motor_control.change_direction,bouncetime = 500)
-        GPIO.add_event_detect(C["BUTTON3"],GPIO.FALLING, callback = self.motor_control.change_direction,bouncetime = 200)
-        GPIO.add_event_detect(C["BUTTON4"],GPIO.FALLING, callback = self.motor_control.change_direction,bouncetime = 200)
-        GPIO.add_event_detect(C["BUTTON5"],GPIO.FALLING, callback = self.motor_control.change_direction,bouncetime = 200)
-        GPIO.add_event_detect(C["BUTTON6"],GPIO.FALLING, callback = self.motor_control.change_direction,bouncetime = 200)
+        GPIO.add_event_detect(C["BUTTON3"],GPIO.FALLING, callback = self.turn_around,bouncetime = 200)
+        GPIO.add_event_detect(C["BUTTON4"],GPIO.FALLING, callback = self.turn_around,bouncetime = 200)
+        GPIO.add_event_detect(C["BUTTON5"],GPIO.FALLING, callback = self.turn_around,bouncetime = 200)
+        GPIO.add_event_detect(C["BUTTON6"],GPIO.FALLING, callback = self.turn_around,bouncetime = 200)
         # event handlers for recieving encoder data
         GPIO.add_event_detect(C["RIGHT_ENCODER_A"],GPIO.BOTH, callback = self.encoder.read_encoder)
         GPIO.add_event_detect(C["RIGHT_ENCODER_B"],GPIO.BOTH, callback = self.encoder.read_encoder)
@@ -205,29 +247,39 @@ class Driver:
 
         # Delays                
         SLEEP_TIME = 1
-        CAMERA_DELAY = 1
+        CAMERA_DELAY = 0.5
+        timer = 0
+
         while True:
+
             # free drive mode
-            if self.drive_mode == 0:
-                # capture image to be used as sign detection
+            if self.drive_mode == 0 or self.drive_mode == 1:
+                # capture image to be used as sign detection        
                 self.camera.capture('images/signs.jpg')
-                # sleep to let picture
                 sleep(CAMERA_DELAY)
+                timer += 1
                 #see if any signs are detected in image
-                stop_sign, start_sign = detect_signs('images/signs.jpg')
-                if stop_sign > 0:
+                sign = detect_signs('images/signs.jpg')
+                if sign == 0:
                     print("STOP SIGN DETECTED")
-                    self.motor_control.start(self.lm_speed,self.rm_speed)
-                if start_sign > 0:
-                    print("START SIGN DETECTED")
-                    self.motor_control.stop_motors(0)
-                else:
-                    print("Signs not detected")   
-            # calibration mode
+                    self.motor_control.end(0)
+                    self.motor_control.stop_motors()  
+                elif sign == 1:
+                    print("YELLOW SIGN DETECTED")
+                    self.update_speed(-10,-10)
+                    self.motor_control.change_speed(self.lm_speed ,self.rm_speed)
+                elif sign == 2:
+                    print("GREEN SIGN DETECTED")
+                    self.update_speed(10,10)
+                    self.motor_control.change_speed(self.lm_speed ,self.rm_speed)
+                elif sign == 3:
+                    print("BLUE SIGN DETECTED")   
+                    # calibration mode
             elif self.drive_mode == 3:
                 self.calibrate_encoders()
             # sleep for specified time
             sleep(SLEEP_TIME)
+            timer += 1
             # make sure all the encoders are set
             self.encoder.reset()
 
