@@ -8,9 +8,6 @@ from pin_setup import setup
 from encoder import Encoder
 from time import sleep
 
-# NOTE: uncomment if we have time for CV
-#from imageReader import detect_signs
-
 class MotorControl:
     # keep track of if motors have been started
     started = False
@@ -28,7 +25,9 @@ class MotorControl:
         self.right_motor.stop()
         self.left_motor.stop()
         # should initially be going forward
-        self.dir = 0      
+        self.lm_dir = 0    
+        self.rm_dir = 0      
+
 
     def start(self,start_lm,start_rm):
         """ Start the motors given starting speeds for the left 
@@ -38,8 +37,8 @@ class MotorControl:
         print("LEFT MOTOR SPEED BEING ADJUSTED TO ",start_lm,"%")
         print("RIGHT MOTOR SPEED BEING ADJUSTED TO ",start_rm,"%")
         # Assign direction
-        GPIO.output(C["LEFT_MOTOR_DIR"], self.dir)
-        GPIO.output(C["RIGHT_MOTOR_DIR"], self.dir)
+        GPIO.output(C["LEFT_MOTOR_DIR"], self.lm_dir)
+        GPIO.output(C["RIGHT_MOTOR_DIR"], self.rm_dir)
         # Should be initially stopped
         GPIO.output(C["RIGHT_MOTOR_SLP"], 1)
         GPIO.output(C["LEFT_MOTOR_SLP"], 1)
@@ -51,8 +50,7 @@ class MotorControl:
 
     def stop_motors(self):
         """ Stop the motors
-        """
-     
+        """ 
         if self.started:
             print("MOTORS STOPPING...........")
             self.left_motor.stop()
@@ -61,46 +59,52 @@ class MotorControl:
         else:
             print("MOTORS ARE ALREADY STOPPED")
 
+
     def reverse(self):
-        if self.dir:
-            self.change_direction(0)
+        if self.lm_dir and self.rm_dir:
+            self.change_direction(True,True)
         else:
             print("ALREADY GOING BACKWARDS")
             return False
         return True
         
+
     def turn_around(self,channel):
         """ Turn the robot around
         """
 
         # start going backward
-        self.change_direction(0)
+        self.change_direction(True,True)
         # increase spped to turn
         self.change_speed(40,20)
         sleep(1)
         # restore speed back
         self.change_speed(30,30)
-        self.change_direction(0)
+        self.change_direction(True,True)
 
-    def change_direction(self,channel):
-        """ change the current direction of the robot
+    def change_direction(self,lm,rm):
+        """ Change the current direction of the robot
         """
+        if lm and rm:
+            self.lm_dir = not self.lm_dir
+            self.rm_dir = not self.rm_dir
+
+        elif lm:
+            self.lm_dir = not self.lm_dir
+
+        elif rm:
+            self.rm_dir = not self.rm_dir
 
         # reverse direction
-        self.dir = not self.dir
-        GPIO.output(C["LEFT_MOTOR_DIR"], self.dir)
-        GPIO.output(C["RIGHT_MOTOR_DIR"], self.dir)
+        GPIO.output(C["LEFT_MOTOR_DIR"], self.lm_dir)
+        GPIO.output(C["RIGHT_MOTOR_DIR"], self.rm_dir)
 
-    def turn_around(self):
-        """ turn robot around after hitting object
-        """
 
     def end(self,channel):
         """ Cleanly exit the program and clear pins 
         that have been defined
         """    
-
-        # stop the motors
+        # Stop the motors
         self.left_motor.stop()
         self.right_motor.stop()
         GPIO.cleanup()
@@ -109,7 +113,7 @@ class MotorControl:
     def change_speed(self,speed_lm,speed_rm):
         """ Change the speed of the motors
         """
-
+        print("-----------------------------------")
         if self.started:
             if speed_lm >99 or speed_rm > 99:
                 print("MOTORS AT MAX SPEED")
@@ -124,3 +128,4 @@ class MotorControl:
                 self.right_motor.ChangeDutyCycle(speed_rm)
         else:
             print("MOTORS HAVE NOT BEEN STARTED")    
+        print("-----------------------------------")
