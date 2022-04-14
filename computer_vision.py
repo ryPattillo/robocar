@@ -40,7 +40,7 @@ def find_shapes(img, contours):
         # get the dimensions to check for square
         dim = cv2.approxPolyDP(cnt, 0.02*cnt_len, True)
         # dim = 4 corresponds to square
-        if len(dim) == 4 and cv2.contourArea(cnt) > 7500:
+        if len(dim) == 4 and cv2.contourArea(cnt) > 5000:
             x,y,w,h = cv2.boundingRect(cnt) # offsets - with this you get 'mask'
         
             if not sign_found:
@@ -114,7 +114,7 @@ def find_contours(img):
 
     # Apply a binary threshold to the image
     thresh =  cv2.adaptiveThreshold(blur,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY_INV,25,11)
-    cv2.imwrite("test_images/thresh_test.jpeg",thresh)
+    cv2.imwrite("test_images/thresh_test.jpg",thresh)
     # Find contours and filter using threshold area
     _,contours,_ = cv2.findContours(thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 

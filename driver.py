@@ -183,7 +183,7 @@ class Driver:
                 self.lm_speed = self.cruising_speed
                 self.rm_speed = self.cruising_speed
             else:
-                self.cruising_speed += 3
+                self.cruising_speed += 1
                 self.lm_speed = self.cruising_speed
                 self.rm_speed = self.cruising_speed
         # reverse drive
