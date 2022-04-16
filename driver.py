@@ -4,11 +4,13 @@ import RPi.GPIO as GPIO
 from time import sleep
 from picamera import PiCamera
 import keyboard
+import time 
 
 from constant import CONSTANTS as C
 from encoder import Encoder
 from motor_control import MotorControl
 from vision import detect_signs, detect_faces
+import cv2
 
 class Driver: 
  
@@ -22,8 +24,8 @@ class Driver:
         self.drive_mode = drive_mode
         self.encoder = Encoder()
         # Set up camera
-        self.camera = PiCamera()
-        self.camera.resolution = (1080,768)
+        # self.camera = PiCamera()
+        # self.camera.resolution = (1080,768)
 
 
     def key_press(self,key):
@@ -42,24 +44,31 @@ class Driver:
             self.update_speed(self.lm_speed + 1,self.cruising_speed)
         # forward drive
         elif key.name == "w":
-            if self.cruising_speed <= 0 and self.motor_control.dir:
+            dir = self.motor_control.lm_dir and self.motor_control.rm_dir 
+            if self.cruising_speed <= 0 and dir:
                 self.motor_control.change_direction(True,True)
-            elif self.motor_control.dir:
-                self.cruising_speed -= 3
+            elif dir:
+                self.cruising_speed -= 2
                 self.update_speed(self.cruising_speed,self.cruising_speed)
             else:
-                self.cruising_speed += 3
+                self.cruising_speed += 1
                 self.update_speed(self.cruising_speed,self.cruising_speed)
         # Reverse drive
         elif key.name == "s":
-            if self.cruising_speed <= 0 and not self.motor_control.dir:
+            dir = self.motor_control.lm_dir and self.motor_control.rm_dir 
+
+            if self.cruising_speed <= 0 and not dir:
                 self.motor_control.change_direction(True,True)
-            elif not self.motor_control.dir:
-                self.cruising_speed -= 5
+            elif not dir:
+                self.cruising_speed -= 2
                 self.update_speed(self.cruising_speed,self.cruising_speed)
             else:
-                self.cruising_speed += 5
+                self.cruising_speed += 1
                 self.update_speed(self.cruising_speed,self.cruising_speed)
+        elif key.name == ",":
+            self.bump_left_react(0)
+        elif key.name == ".":
+            self.bump_right_react(0)     
         # E - Break
         elif key.name == "shift":
             self.cruising_speed = 10
@@ -111,22 +120,36 @@ class Driver:
         right motors
         """
 
-        if self.lm_speed > 99:
+        if lm_speed > 99:
             print("LEFT MOTOR AT MAX SPEED")
-        elif self.lm_speed < 0:
+        elif lm_speed < 0:
             print("LEFT MOTOR AT MIN SPEED")
         else:    
             self.lm_speed = lm_speed
 
-        if self.rm_speed:
+        if rm_speed > 99:
             print("RIGHT MOTOR AT MAX SPEED")
-        elif self.rm_speed  < 0:
+        elif rm_speed  < 0:
             print("RIGHT MOTOR AT MIN SPEED")
         else:
             self.rm_speed = rm_speed
 
 
-    def bump_sensor_react(self,channel):
+    def bump_left_react(self,channel):
+        """ Response for bump sensors bring hit
+        """
+        # start going backward
+        self.motor_control.change_direction(True,True)
+        sleep(.15)
+        # Put right motor forward
+        self.motor_control.change_direction(True,False)
+        self.motor_control.change_speed(30,30)
+        sleep(.15)
+        self.motor_control.change_direction(False,True)
+        assert self.motor_control.lm_dir == self.motor_control.rm_dir
+
+
+    def bump_right_react(self,channel):
         """ Response for bump sensors bring hit
         """
         # start going backward
@@ -212,11 +235,12 @@ class Driver:
         """ All the button sensors and encoder interrupts
         """
         # robot should reverse when it hits something
-        GPIO.add_event_detect(C["BUTTON1"],GPIO.FALLING, callback = self.bump_sensor_react,bouncetime = 500)
-        GPIO.add_event_detect(C["BUTTON3"],GPIO.FALLING, callback = self.bump_sensor_react,bouncetime = 200)
-        GPIO.add_event_detect(C["BUTTON4"],GPIO.FALLING, callback = self.bump_sensor_react,bouncetime = 200)
-        GPIO.add_event_detect(C["BUTTON5"],GPIO.FALLING, callback = self.bump_sensor_react,bouncetime = 200)
-        GPIO.add_event_detect(C["BUTTON6"],GPIO.FALLING, callback = self.bump_sensor_react,bouncetime = 200)
+        GPIO.add_event_detect(C["BUTTON1"],GPIO.FALLING, callback = self.bump_left_react,bouncetime = 200)
+        GPIO.add_event_detect(C["BUTTON2"],GPIO.FALLING, callback = self.bump_left_react,bouncetime = 500)
+        GPIO.add_event_detect(C["BUTTON3"],GPIO.FALLING, callback = self.bump_left_react,bouncetime = 200)
+        GPIO.add_event_detect(C["BUTTON4"],GPIO.FALLING, callback = self.bump_right_react,bouncetime = 200)
+        GPIO.add_event_detect(C["BUTTON5"],GPIO.FALLING, callback = self.bump_right_react,bouncetime = 200)
+        GPIO.add_event_detect(C["BUTTON6"],GPIO.FALLING, callback = self.bump_right_react,bouncetime = 200)
         # event handlers for recieving encoder data
         GPIO.add_event_detect(C["RIGHT_ENCODER_A"],GPIO.BOTH, callback = self.encoder.read_encoder)
         GPIO.add_event_detect(C["RIGHT_ENCODER_B"],GPIO.BOTH, callback = self.encoder.read_encoder)
@@ -234,47 +258,49 @@ class Driver:
             # keyboard listener
             keyboard.on_press(self.key_press)
  
-        # Delays                
-        SLEEP_TIME = 1
-        # Give camera time to take image
-        CAMERA_DELAY = 0.5
-        SIGN_IMG = 'images/signs.jpg'
-    
+        # initialize video stream
+        cap = cv2.VideoCapture(0)
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+        # Make sure camera is open
+        if not cap.isOpened():
+            print("Cannot open camera")
+            exit()
+        else:
+            print("camera opened")
+        # Get start timer
+        start = time.time()
         while True:
-            # FREE DRIVE /TELEOP MODE
             if self.drive_mode == 0 or self.drive_mode == 1:
-                # Capture an image
-                print("-----------------------------------")
-                print(f"TAKING IMAGE AND SAVING TO {SIGN_IMG}")
-                self.camera.capture(SIGN_IMG)
-                sleep(CAMERA_DELAY)
-                timer += CAMERA_DELAY
-                # Check if any signs were found
-                sign = detect_signs(SIGN_IMG)
-                # Stop Sign
-                if sign == 0:
-                    print("STOP SIGN DETECTED")
-                    self.motor_control.stop_motors()  
-                # Yellow Sign    
-                elif sign == 1:
-                    print("YELLOW SIGN DETECTED")
-                    self.update_speed(self.lm_speed-10,self.rm_speed-10)
-                    self.motor_control.change_speed(self.lm_speed ,self.rm_speed)
-                # Green Sign
-                elif sign == 2:
-                    print("GREEN SIGN DETECTED")
-                    self.update_speed(self.lm_speed+10,self.rm_speed+10)
-                    self.motor_control.change_speed(self.lm_speed ,self.rm_speed)
-                else:
-                    print("NO SIGNS DETECTED")
-                print("-----------------------------------")
-    
+                ret, frame = cap.read()
+                if not ret:
+                    print("STREAM NOT AVAILABLE")
+                    break
+                # See if any signs
+                sign = detect_signs(frame) 
+                # -1 means nothing was found        
+                if not sign == -1:
+                    end = time.time()
+                    time_passed = end - start
+                    # Get the time passed, only detect signs after 3 seconds
+                    if time_passed > 3:
+                        if sign == 0:
+                            print("STOP SIGN DETECTED")
+                            self.motor_control.stop_motors()  
+                        # Yellow Sign    
+                        elif sign == 1:
+                            print("YELLOW SIGN DETECTED")
+                            self.update_speed(self.lm_speed-10,self.rm_speed-10)
+                            self.motor_control.change_speed(self.lm_speed ,self.rm_speed)
+                        # Green Sign
+                        elif sign == 2:
+                            print("GREEN SIGN DETECTED")
+                            self.update_speed(self.lm_speed+10,self.rm_speed+10)
+                            self.motor_control.change_speed(self.lm_speed ,self.rm_speed)
+                        start = time.time()
             # Calibrate encoders
             elif self.drive_mode == 3:
                 self.calibrate_encoders()
-          
-            sleep(SLEEP_TIME)
-            timer += SLEEP_TIME
             # REST ALL THE ECONDERS
             self.encoder.reset()
 

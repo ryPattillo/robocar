@@ -53,11 +53,13 @@ def get_squares(img, contours):
                 # Get bgr array
                 bgr_color = np.uint8([[[color[0],color[1],color[2] ]]])
                 color = cv2.cvtColor(bgr_color,cv2.COLOR_BGR2HSV)
+
                 # Get color masks
-                yellow = cv2.inRange(color, (25, 50, 70), (35, 255,255))
+                yellow = cv2.inRange(color, (15, 50, 70), (35, 255,255))
                 green = cv2.inRange(color, (36, 25, 25), (86, 255,255))
                 red1 = cv2.inRange(color, (159, 50, 70), (180, 255, 155))
                 red2 = cv2.inRange(color, (0, 50, 70), (9, 255, 255))
+
                 red = red1 | red2
                 # Red sign detected
                 if red[0][0] == 255:
@@ -86,22 +88,25 @@ def get_contours(img):
     # Blur the image
     blur = cv2.medianBlur(gray, 5)
     # Apply a adaptive threshold to the image
-    thresh =  cv2.adaptiveThreshold(blur,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY_INV,25,11)
+    thresh =  cv2.adaptiveThreshold(blur,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY_INV,21,9)
     # Write to test file for debugging
     cv2.imwrite("test_images/thresh_test.jpg",thresh)
+
     # Find contours and filter using threshold area
     _,contours,_ = cv2.findContours(thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
     return contours
 
 
-def detect_signs(img_name):
+def detect_signs(frame):
     """ Look for signs in the image with name
     image_name
     """
     # Get and flip image right side up
-    img = cv2.imread(img_name)
-    img = cv2.flip(img,0)
+    img = cv2.flip(frame,0)
+    cv2.imwrite("videoframe.jpg",img)
+    # img = cv2.imread(img_name)
+    # img = cv2.flip(img,0)
     # Keep original reference ofr reference
     orig_img = img
     contours =  get_contours(img)
