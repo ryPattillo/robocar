@@ -15,8 +15,8 @@ class MotorControl:
     def __init__(self):
         # set up left and right motor controls
         # NOTE:  motors should initally be off, [SLP = 1]
-        GPIO.output(C["RIGHT_MOTOR_SLP"], 1)
-        GPIO.output(C["LEFT_MOTOR_SLP"], 1)
+        GPIO.output(C["RIGHT_MOTOR_SLP"], 0)
+        GPIO.output(C["LEFT_MOTOR_SLP"], 0)
         # set right and left motor equal to the PWM pins
         # NOTE: 2nd refers to the frequency of the PWM
         self.right_motor = GPIO.PWM(C["RIGHT_MOTOR_PWM"], 1000)
@@ -88,14 +88,12 @@ class MotorControl:
         if lm and rm:
             self.lm_dir = not self.lm_dir
             self.rm_dir = not self.rm_dir
-
         elif lm:
             self.lm_dir = not self.lm_dir
-
         elif rm:
             self.rm_dir = not self.rm_dir
 
-        # reverse direction
+        # Switch directions
         GPIO.output(C["LEFT_MOTOR_DIR"], self.lm_dir)
         GPIO.output(C["RIGHT_MOTOR_DIR"], self.rm_dir)
 

@@ -17,16 +17,12 @@ class Driver:
     def __init__(self,drive_mode,cruising_speed):
         self.motor_control = MotorControl()
         # Speed should be 0 for both motors initially
-        self.lm_speed = 0
-        self.rm_speed = 0
+        self.lm_speed = cruising_speed
+        self.rm_speed = cruising_speed 
         # Speed that motors should be restored to after turning
         self.cruising_speed = cruising_speed
         self.drive_mode = drive_mode
         self.encoder = Encoder()
-        # Set up camera
-        # self.camera = PiCamera()
-        # self.camera.resolution = (1080,768)
-
 
     def key_press(self,key):
         """ keyboard listener for teleop
@@ -66,9 +62,9 @@ class Driver:
                 self.cruising_speed += 1
                 self.update_speed(self.cruising_speed,self.cruising_speed)
         elif key.name == ",":
-            self.bump_left_react(0)
+            self.bump_react(3)
         elif key.name == ".":
-            self.bump_right_react(0)     
+            self.bump_react(27)     
         # E - Break
         elif key.name == "shift":
             self.cruising_speed = 10
@@ -135,46 +131,48 @@ class Driver:
             self.rm_speed = rm_speed
 
 
-    def bump_left_react(self,channel):
-        """ Response for bump sensors bring hit
-        """
-        # start going backward
+    def bump_react(self,channel):
+        ''' How the robot will react to each of its bump sensors being hit
+        '''
+
+        # initiially reverse
         self.motor_control.change_direction(True,True)
-        sleep(.15)
-        # Put right motor forward
-        self.motor_control.change_direction(True,False)
-        self.motor_control.change_speed(30,30)
-        sleep(.15)
-        self.motor_control.change_direction(False,True)
+        sleep(.35)
+
+        # how long robot should turn for based on each sensor
+        if channel == 2:
+            sleep_time = 0.25
+
+        elif channel == 3:
+            sleep_time = 0.30
+        
+        elif channel == 4:
+            sleep_time = 0.35
+        
+        elif channel == 17:
+            sleep_time = 0.25
+        
+        elif channel == 27:
+            sleep_time = 0.20
+        
+        elif channel == 22:
+            sleep_time = 0.15    
+
+        if channel < 20:
+            self.motor_control.change_direction(True,False)
+            self.motor_control.change_speed(35,35)
+            sleep(sleep_time)
+            self.motor_control.change_direction(False,True)
+        else:
+            self.motor_control.change_direction(False,True)
+            self.motor_control.change_speed(35,35)
+            sleep(sleep_time)
+            self.motor_control.change_direction(True,False)
+
         assert self.motor_control.lm_dir == self.motor_control.rm_dir
+        # restore speed back to normal
+        self.motor_control.change_speed(self.lm_speed,self.rm_speed)
 
-
-    def bump_right_react(self,channel):
-        """ Response for bump sensors bring hit
-        """
-        # start going backward
-        self.motor_control.change_direction(True,True)
-        sleep(.15)
-        # Put right motor forward
-        self.motor_control.change_direction(False,True)
-        self.motor_control.change_speed(30,30)
-        sleep(.15)
-        self.motor_control.change_direction(True,False)
-        assert self.motor_control.lm_dir == self.motor_control.rm_dir
-
-
-    def turn_around(self):
-        """ Utility function for robot doing a 180
-        """
-
-        # start going backward
-        self.motor_control.change_direction(True,True)
-        # increase spped to turn
-        self.motor_control.change_speed(10,60)
-        sleep(.75)
-        # restore speed back
-        self.motor_control.change_speed(self.cruising_speed,self.cruising_speed)
-        self.motor_control.change_direction(0)
 
     def print_ticks(self,ticks):
         """ Utility print function to print out encoder data
@@ -193,6 +191,7 @@ class Driver:
 
         print("LEFT A ENCODER ERROR: ", la_error)
         print("LEFT B ENCODER ERROR: ", lb_error)
+        print()
         print("RIGHT A ENCODER ERROR: ", ra_error)
         print("RIGHT B ENCODER ERROR: ", rb_error)
         print("ADJUSTING SPEED TO MINIMIZE ERROR")
@@ -205,6 +204,7 @@ class Driver:
         '"""
 
         ticks = (0,0,0,0)
+        self.motor_control.start(20,20)
         if self.motor_control.started:
             # try each speed
             for speed in range(20,99):
@@ -235,12 +235,13 @@ class Driver:
         """ All the button sensors and encoder interrupts
         """
         # robot should reverse when it hits something
-        GPIO.add_event_detect(C["BUTTON1"],GPIO.FALLING, callback = self.bump_left_react,bouncetime = 200)
-        GPIO.add_event_detect(C["BUTTON2"],GPIO.FALLING, callback = self.bump_left_react,bouncetime = 500)
-        GPIO.add_event_detect(C["BUTTON3"],GPIO.FALLING, callback = self.bump_left_react,bouncetime = 200)
-        GPIO.add_event_detect(C["BUTTON4"],GPIO.FALLING, callback = self.bump_right_react,bouncetime = 200)
-        GPIO.add_event_detect(C["BUTTON5"],GPIO.FALLING, callback = self.bump_right_react,bouncetime = 200)
-        GPIO.add_event_detect(C["BUTTON6"],GPIO.FALLING, callback = self.bump_right_react,bouncetime = 200)
+        GPIO.add_event_detect(C["BUTTON1"],GPIO.FALLING, callback = self.bump_react,bouncetime = 1000)
+        GPIO.add_event_detect(C["BUTTON2"],GPIO.FALLING, callback = self.bump_react,bouncetime = 1000)
+        GPIO.add_event_detect(C["BUTTON3"],GPIO.FALLING, callback = self.bump_react,bouncetime = 1000)
+
+        GPIO.add_event_detect(C["BUTTON4"],GPIO.FALLING, callback = self.bump_react,bouncetime = 1000)
+        GPIO.add_event_detect(C["BUTTON5"],GPIO.FALLING, callback = self.bump_react,bouncetime = 1000)
+        GPIO.add_event_detect(C["BUTTON6"],GPIO.FALLING, callback = self.bump_react,bouncetime = 1000)
         # event handlers for recieving encoder data
         GPIO.add_event_detect(C["RIGHT_ENCODER_A"],GPIO.BOTH, callback = self.encoder.read_encoder)
         GPIO.add_event_detect(C["RIGHT_ENCODER_B"],GPIO.BOTH, callback = self.encoder.read_encoder)
@@ -264,10 +265,10 @@ class Driver:
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
         # Make sure camera is open
         if not cap.isOpened():
-            print("Cannot open camera")
+            print("CANNOT OPEN VIDEO STREAM")
             exit()
         else:
-            print("camera opened")
+            print("VIDEO STREAM OPENED")
         # Get start timer
         start = time.time()
         while True:
@@ -287,20 +288,24 @@ class Driver:
                         if sign == 0:
                             print("STOP SIGN DETECTED")
                             self.motor_control.stop_motors()  
+                            start = time.time()
+
                         # Yellow Sign    
                         elif sign == 1:
                             print("YELLOW SIGN DETECTED")
-                            self.update_speed(self.lm_speed-10,self.rm_speed-10)
+                            self.update_speed(25,25)
                             self.motor_control.change_speed(self.lm_speed ,self.rm_speed)
+                            start = time.time()
+
                         # Green Sign
                         elif sign == 2:
                             print("GREEN SIGN DETECTED")
                             self.update_speed(self.lm_speed+10,self.rm_speed+10)
                             self.motor_control.change_speed(self.lm_speed ,self.rm_speed)
-                        start = time.time()
+                            start = time.time()
             # Calibrate encoders
-            elif self.drive_mode == 3:
-                self.calibrate_encoders()
+            elif self.drive_mode == 2:
+                self.calibrate_encoders(self.encoder,1)
             # REST ALL THE ECONDERS
             self.encoder.reset()
 
